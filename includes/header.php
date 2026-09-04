@@ -195,25 +195,30 @@ if ($breakingResult) {
 <!-- TOAST NOTIFICATION CONTAINER -->
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- MUSOR DROP LEFT AD BANNER (GIF) -->
-<aside class="ad-banner-left ad-banner-video" id="musorDropBanner">
+<!-- MUSOR DROP ANNOYING AD BANNER (GIF) -->
+<aside class="ad-banner-left ad-banner-video ad-banner-annoying" id="musorDropBanner">
+    <div class="ad-annoying-ribbon">🔥 100 000€ JACKPOT! 🔥</div>
     <div class="ad-video-header">
-        <span class="ad-tag">REKLAAM</span>
-        <button class="ad-close-btn" onclick="document.getElementById('musorDropBanner').style.display='none'" title="Sulge reklaam">✕</button>
+        <span class="ad-tag ad-blink">⚡ KUUM REKLAAM</span>
+        <button class="ad-close-btn" id="adCloseBtn" onclick="handleAdClose(event)" title="Sulge reklaam">✕</button>
     </div>
     <div class="ad-video-wrapper">
-        <a href="https://musor.best/" target="_blank" title="Ava Musor Drop">
+        <a href="https://musor.best/" target="_blank" title="Ava Musor Drop" onclick="playBeep()">
             <img 
                 src="<?= isset($depth) && $depth == 1 ? '../' : '' ?>images/MUSOR%20DROP%20-%20FerrikBEAT%20(720p,%20h264).gif" 
                 alt="Musor Drop" 
                 class="ad-gif-img"
             >
+            <div class="ad-click-overlay">👉 KLÕPSA SIIN! 👈</div>
         </a>
+    </div>
+    <div class="ad-timer-bar">
+        <span>Boonus aegub: <b id="adCountdown">00:49</b></span>
     </div>
     <div class="ad-video-footer">
         <div class="ad-video-title">🗑️ MUSOR DROP</div>
-        <a href="https://musor.best/" target="_blank" class="ad-video-cta" onclick="if(typeof showToast==='function') showToast('Suunatakse lehele Musor Drop...');">
-            Ava leht ➔
+        <a href="https://musor.best/" target="_blank" class="ad-video-cta ad-pulse-btn" onclick="playBeep()">
+            VÕTA 500€ ➔
         </a>
     </div>
 </aside>
