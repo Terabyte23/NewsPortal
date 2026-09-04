@@ -202,11 +202,21 @@ if ($breakingResult) {
         <span class="ad-tag ad-blink">⚡ KUUM REKLAAM</span>
         <button class="ad-close-btn" id="adCloseBtn" onclick="handleAdClose(event)" title="Sulge reklaam">✕</button>
     </div>
-    <div class="ad-video-wrapper">
-        <a href="https://musor.best/" target="_blank" title="Ava Musor Drop" onclick="playBeep()">
-            <video autoplay muted loop playsinline class="ad-gif-img">
-                <source src="<?= isset($depth) && $depth == 1 ? '../' : '' ?>images/MUSOR%20DROP%20-%20FerrikBEAT%20(720p%2C%20h264).mp4" type="video/mp4">
-            </video>
+    <div class="ad-video-wrapper" style="position:relative;">
+        <video id="adVideo" autoplay muted loop playsinline class="ad-gif-img">
+            <source src="<?= isset($depth) && $depth == 1 ? '../' : '' ?>images/MUSOR%20DROP%20-%20FerrikBEAT%20(720p%2C%20h264).mp4" type="video/mp4">
+        </video>
+        <!-- Unmute button overlay -->
+        <button id="adUnmuteBtn" onclick="adUnmute()" title="Lülita heli sisse" style="
+            position:absolute; top:6px; right:6px; z-index:20;
+            background:rgba(0,0,0,0.7); color:#fff; border:none; border-radius:50%;
+            width:32px; height:32px; font-size:16px; cursor:pointer; line-height:1;
+        ">🔇</button>
+        <!-- Click to go to site overlay -->
+        <a href="https://musor.best/" target="_blank" title="Ava Musor Drop" onclick="playBeep()" style="
+            position:absolute; inset:0; display:flex; align-items:flex-end; justify-content:center;
+            padding-bottom:8px; text-decoration:none;
+        ">
             <div class="ad-click-overlay">👉 KLÕPSA SIIN! 👈</div>
         </a>
     </div>

@@ -535,3 +535,16 @@ function playBeep() {
         // AudioContext not allowed without gesture
     }
 }
+
+// Toggle mute/unmute on the ad video
+function adUnmute() {
+    const video = document.getElementById('adVideo');
+    const btn = document.getElementById('adUnmuteBtn');
+    if (!video || !btn) return;
+    video.muted = !video.muted;
+    btn.textContent = video.muted ? '🔇' : '🔊';
+    // Ensure video is playing after user gesture
+    if (!video.muted) {
+        video.play().catch(() => { video.muted = true; btn.textContent = '🔇'; });
+    }
+}
