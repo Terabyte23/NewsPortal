@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (!isset($conn)) {
     require_once __DIR__ . '/../db.php';
 }
@@ -36,8 +36,8 @@ if ($breakingResult) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Base CSS -->
-    <link rel="stylesheet" href="<?= isset($depth) && $depth == 1 ? '../style.css' : 'style.css' ?>">
+    <!-- Base CSS with dynamic cache buster -->
+    <link rel="stylesheet" href="<?= (isset($depth) && $depth == 1 ? '../style.css' : 'style.css') . '?v=' . time() ?>">
     <script>
         // Init theme early to prevent flash of unstyled content
         (function() {

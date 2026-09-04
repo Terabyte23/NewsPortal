@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Footer component
 ?>
 <footer class="footer">
@@ -77,6 +77,6 @@
 </footer>
 
 <!-- JS SCRIPTS -->
-<script src="<?= isset($depth) && $depth == 1 ? '../js/main.js' : 'js/main.js' ?>"></script>
+<script src="<?= (isset($depth) && $depth == 1 ? '../js/main.js' : 'js/main.js') . '?v=' . time() ?>"></script>
 </body>
 </html>
