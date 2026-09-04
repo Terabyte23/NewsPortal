@@ -195,20 +195,20 @@ if ($breakingResult) {
 <!-- TOAST NOTIFICATION CONTAINER -->
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- MUSOR DROP LEFT AD BANNER (VIDEO) -->
+<!-- MUSOR DROP LEFT AD BANNER (GIF) -->
 <aside class="ad-banner-left ad-banner-video" id="musorDropBanner">
     <div class="ad-video-header">
         <span class="ad-tag">REKLAAM</span>
         <button class="ad-close-btn" onclick="document.getElementById('musorDropBanner').style.display='none'" title="Sulge reklaam">✕</button>
     </div>
     <div class="ad-video-wrapper">
-        <iframe 
-            src="https://www.youtube-nocookie.com/embed/6iGXX9-KmXQ?autoplay=1&mute=1&loop=1&playlist=6iGXX9-KmXQ&controls=1&modestbranding=1&rel=0" 
-            title="Musor Drop Video" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-            allowfullscreen>
-        </iframe>
+        <a href="https://musor.best/" target="_blank" title="Ava Musor Drop">
+            <img 
+                src="<?= isset($depth) && $depth == 1 ? '../' : '' ?>images/MUSOR%20DROP%20-%20FerrikBEAT%20(720p,%20h264).gif" 
+                alt="Musor Drop" 
+                class="ad-gif-img"
+            >
+        </a>
     </div>
     <div class="ad-video-footer">
         <div class="ad-video-title">🗑️ MUSOR DROP</div>
