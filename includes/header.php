@@ -194,3 +194,48 @@ if ($breakingResult) {
 
 <!-- TOAST NOTIFICATION CONTAINER -->
 <div class="toast-container" id="toastContainer"></div>
+
+<!-- MUSOR DROP LEFT AD BANNER -->
+<aside class="ad-banner-left" id="musorDropBanner">
+    <button class="ad-close-btn" onclick="document.getElementById('musorDropBanner').style.display='none'" title="Sulge reklaam">✕</button>
+    <div class="ad-tag">REKLAAM 18+</div>
+    
+    <div class="ad-brand">
+        <div class="ad-logo-icon">🗑️</div>
+        <div class="ad-logo-text">
+            <div class="ad-logo-title">MUSOR<span class="ad-highlight">DROP</span></div>
+            <div class="ad-logo-sub">OFFICIAL CS2 DROP</div>
+        </div>
+    </div>
+    
+    <div class="ad-case-preview">
+        <div class="ad-case-badge">-40% ALE</div>
+        <div class="ad-item-icon">🔪</div>
+        <div class="ad-case-name">Legendary Trash Case</div>
+        <div class="ad-case-price"><span>€4.99</span> <strong>€2.99</strong></div>
+    </div>
+
+    <div class="ad-features">
+        <div class="ad-feat-item">⚡ Välkkiired väljamaksed</div>
+        <div class="ad-feat-item">🎁 Tasuta igapäevane drop</div>
+        <div class="ad-feat-item">💎 +35% boonus sissemaksel</div>
+    </div>
+
+    <div class="ad-promo-box" onclick="if(navigator.clipboard){navigator.clipboard.writeText('NEWSPORTAL'); showToast('Promokood NEWSPORTAL kopeeritud!');}">
+        <span class="ad-promo-label">SOODUSKOOD:</span>
+        <div class="ad-promo-code">
+            <code>NEWSPORTAL</code>
+            <span class="ad-copy-badge">KOPEERI</span>
+        </div>
+    </div>
+
+    <a href="https://musordrop.com" target="_blank" class="ad-cta-btn" onclick="showToast('Suunatakse lehele MusorDrop.com...')">
+        <span>AVA KASTID</span>
+        <span class="ad-btn-icon">➔</span>
+    </a>
+
+    <div class="ad-live-drops">
+        <span class="ad-live-dot"></span>
+        <span class="ad-live-text">Viimane: <b>Karambit (€840)</b></span>
+    </div>
+</aside>
