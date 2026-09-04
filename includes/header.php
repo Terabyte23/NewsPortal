@@ -204,11 +204,9 @@ if ($breakingResult) {
     </div>
     <div class="ad-video-wrapper">
         <a href="https://musor.best/" target="_blank" title="Ava Musor Drop" onclick="playBeep()">
-            <img 
-                src="<?= isset($depth) && $depth == 1 ? '../' : '' ?>images/MUSOR%20DROP%20-%20FerrikBEAT%20(720p,%20h264).gif" 
-                alt="Musor Drop" 
-                class="ad-gif-img"
-            >
+            <video autoplay muted loop playsinline class="ad-gif-img">
+                <source src="<?= isset($depth) && $depth == 1 ? '../' : '' ?>images/MUSOR%20DROP%20-%20FerrikBEAT%20(720p%2C%20h264).mp4" type="video/mp4">
+            </video>
             <div class="ad-click-overlay">👉 KLÕPSA SIIN! 👈</div>
         </a>
     </div>
