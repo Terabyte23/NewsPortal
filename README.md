@@ -3,7 +3,7 @@
 [![PHP Version](https://img.shields.io/badge/PHP-8.0%2B-777bb4?logo=php&logoColor=white)](https://php.net/)
 [![Database](https://img.shields.io/badge/MySQL-5.7%2B%20%2F%20MariaDB-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![Web Server](https://img.shields.io/badge/Apache-XAMPP-FB7A24?logo=apache&logoColor=white)](https://www.apachefriends.org/)
-[![UI/UX](https://img.shields.io/badge/Design-Dark%20%26%20Light%20Mode-ff3d00)](style.css)
+[![UI/UX](https://img.shields.io/badge/Design-Dark%20%26%20Light%20Mode-3b82f6)](style.css)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Kaasaegne, täisfunktsionaalne uudisteportaal ja toimetuse sisuhaldussüsteem (CMS), mis on loodud PHP 8, MySQL ja modernse JavaScripti baasil. Platvorm sisaldab reaalajas vidinaid, tehisintellekti helilugemise tuge (Text-to-Speech), interaktiivseid reaktsioone, järjehoidjaid ning võimsat administraatori juhtpaneeli.

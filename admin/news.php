@@ -84,7 +84,7 @@ include 'header.php';
                                 <?= htmlspecialchars($n['title']) ?>
                             </a>
                             <?php if (!empty($n['is_featured'])): ?>
-                                <span style="background: rgba(255, 61, 0, 0.2); color: var(--primary); font-size: 0.6875rem; padding: 1px 6px; border-radius: 4px; font-weight: 800; margin-left: 6px;">ESILUGU</span>
+                                <span style="background: var(--primary-light); color: var(--primary); font-size: 0.6875rem; padding: 1px 6px; border-radius: 4px; font-weight: 800; margin-left: 6px;">ESILUGU</span>
                             <?php endif; ?>
                         </td>
                         <td><span class="badge-category" style="font-size: 0.6875rem;"><?= htmlspecialchars($n['category_name'] ?? 'Määramata') ?></span></td>

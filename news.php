@@ -105,7 +105,7 @@ include 'includes/header.php';
             <div class="tts-info">
                 <div class="tts-title">
                     <span>🎧 Kuula artikli heliesitust</span>
-                    <small style="background: rgba(255, 61, 0, 0.15); color: var(--primary); padding: 1px 6px; border-radius: 4px; font-size: 0.6875rem;">AI Voice</small>
+                    <small style="background: var(--primary-light); color: var(--primary); padding: 1px 6px; border-radius: 4px; font-size: 0.6875rem;">AI Voice</small>
                 </div>
                 <div class="tts-status" id="ttsStatus">Klõpsa nupule, et alustada kuulamist eesti keeles</div>
                 <div class="tts-progress-bar">
