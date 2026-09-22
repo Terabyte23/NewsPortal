@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/auth_check.php';
 $adminPage = 'news';
 $pageTitle = 'Kõik uudised';
 
@@ -95,7 +95,7 @@ include 'header.php';
                             <div class="action-btns" style="justify-content: flex-end;">
                                 <a href="news-edit.php?id=<?= $n['id'] ?>" class="action-btn-edit">Muuda</a>
                                 <span style="color: var(--border-color);">|</span>
-                                <a href="news-delete.php?id=<?= $n['id'] ?>" class="action-btn-del" onclick="return confirm('Kas soovid artikli kindlasti kustutada?');">Kustuta</a>
+                                <a href="news-delete.php?id=<?= $n['id'] ?>&csrf_token=<?= csrf_token() ?>" class="action-btn-del" onclick="return confirm('Kas soovid artikli kindlasti kustutada?');">Kustuta</a>
                             </div>
                         </td>
                     </tr>

@@ -9,16 +9,25 @@ if ($id <= 0) {
 }
 
 // 1. Increment view counter
-$conn->query("UPDATE news SET views = views + 1 WHERE id = $id");
+$stmtView = $conn->prepare("UPDATE news SET views = views + 1 WHERE id = ?");
+if ($stmtView) {
+    $stmtView->bind_param("i", $id);
+    $stmtView->execute();
+}
 
 // 2. Fetch news with category and author
-$sql = "SELECT n.*, c.name AS category_name, c.id AS cat_id, u.name AS author_name, u.job AS author_job, u.avatar AS author_avatar
+$stmtNews = $conn->prepare("SELECT n.*, c.name AS category_name, c.id AS cat_id, u.name AS author_name, u.job AS author_job, u.avatar AS author_avatar
         FROM news n
         LEFT JOIN category c ON n.category_id = c.id
         LEFT JOIN users u ON n.user_id = u.id
-        WHERE n.id = $id";
-$res = $conn->query($sql);
-$news = ($res && $res->num_rows > 0) ? $res->fetch_assoc() : null;
+        WHERE n.id = ?");
+$news = null;
+if ($stmtNews) {
+    $stmtNews->bind_param("i", $id);
+    $stmtNews->execute();
+    $res = $stmtNews->get_result();
+    $news = ($res && $res->num_rows > 0) ? $res->fetch_assoc() : null;
+}
 
 if (!$news) {
     die("<div style='text-align:center; padding:50px; font-family:sans-serif;'><h2>Uudist ei leitud.</h2><p><a href='index.php'>Tagasi pealehele</a></p></div>");
@@ -30,14 +39,24 @@ $readTime = calculate_reading_time($news['text']);
 $reactions = json_decode($news['reactions'] ?? '{}', true) ?: [];
 
 // 3. Fetch Comments
-$commentsSql = "SELECT * FROM comments WHERE news_id = $id ORDER BY id DESC";
-$commentsRes = $conn->query($commentsSql);
+$stmtComm = $conn->prepare("SELECT * FROM comments WHERE news_id = ? ORDER BY id DESC");
+$commentsRes = null;
+if ($stmtComm) {
+    $stmtComm->bind_param("i", $id);
+    $stmtComm->execute();
+    $commentsRes = $stmtComm->get_result();
+}
 $commentsCount = $commentsRes ? $commentsRes->num_rows : 0;
 
 // 4. Fetch Related News in same category
 $catId = (int)$news['category_id'];
-$relatedSql = "SELECT * FROM news WHERE category_id = $catId AND id != $id ORDER BY id DESC LIMIT 3";
-$relatedRes = $conn->query($relatedSql);
+$stmtRel = $conn->prepare("SELECT * FROM news WHERE category_id = ? AND id != ? ORDER BY id DESC LIMIT 3");
+$relatedRes = null;
+if ($stmtRel) {
+    $stmtRel->bind_param("ii", $catId, $id);
+    $stmtRel->execute();
+    $relatedRes = $stmtRel->get_result();
+}
 
 include 'includes/header.php';
 ?>

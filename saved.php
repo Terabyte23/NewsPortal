@@ -35,20 +35,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let html = '';
     list.forEach(item => {
+        const safeId = parseInt(item.id, 10) || 0;
+        const safeImg = escapeHtml(item.image || 'images/picture.jpg');
+        const safeCategory = escapeHtml(item.category || 'Uudis');
+        const safeTitle = escapeHtml(item.title || '');
+        const safeDate = escapeHtml(item.date || 'Täna');
+
         html += `
             <article class="news-card">
                 <div class="card-image-box">
-                    <img src="${item.image || 'images/picture.jpg'}" alt="">
-                    <span class="card-category-badge">${item.category}</span>
-                    <button class="card-bookmark-btn saved" data-id="${item.id}" title="Eemalda">
+                    <img src="${safeImg}" alt="${safeTitle}">
+                    <span class="card-category-badge">${safeCategory}</span>
+                    <button class="card-bookmark-btn saved" data-id="${safeId}" title="Eemalda">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
                     </button>
                 </div>
                 <div class="card-body">
-                    <h3 class="card-title"><a href="news.php?id=${item.id}">${item.title}</a></h3>
+                    <h3 class="card-title"><a href="news.php?id=${safeId}">${safeTitle}</a></h3>
                     <div class="card-bottom-bar" style="margin-top: auto;">
-                        <span>${item.date}</span>
-                        <a href="news.php?id=${item.id}" class="card-read-more">Loe edasi →</a>
+                        <span>${safeDate}</span>
+                        <a href="news.php?id=${safeId}" class="card-read-more">Loe edasi →</a>
                     </div>
                 </div>
             </article>

@@ -1,14 +1,19 @@
 <?php
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/auth_check.php';
 $adminPage = 'comments';
 $pageTitle = 'Kommentaaride modereerimine';
 
 $msg = '';
 if (isset($_GET['del'])) {
+    admin_verify_csrf();
     $delId = (int)$_GET['del'];
     if ($delId > 0) {
-        $conn->query("DELETE FROM comments WHERE id = $delId");
-        $msg = 'Kommentaar edukalt kustutatud!';
+        $stmt = $conn->prepare("DELETE FROM comments WHERE id = ?");
+        if ($stmt) {
+            $stmt->bind_param("i", $delId);
+            $stmt->execute();
+            $msg = 'Kommentaar edukalt kustutatud!';
+        }
     }
 }
 
@@ -55,7 +60,7 @@ include 'header.php';
                         <td style="max-width: 320px;"><?= nl2br(htmlspecialchars($cm['text'])) ?></td>
                         <td><?= format_time_ago($cm['date']) ?></td>
                         <td style="text-align: right;">
-                            <a href="comments.php?del=<?= $cm['id'] ?>" class="action-btn-del" onclick="return confirm('Kustuta see kommentaar?');">Kustuta</a>
+                            <a href="comments.php?del=<?= $cm['id'] ?>&csrf_token=<?= csrf_token() ?>" class="action-btn-del" onclick="return confirm('Kustuta see kommentaar?');">Kustuta</a>
                         </td>
                     </tr>
                 <?php endwhile; ?>

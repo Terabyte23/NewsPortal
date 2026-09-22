@@ -1,18 +1,23 @@
 <?php
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/auth_check.php';
+admin_verify_csrf();
 
-$currentUser = get_logged_in_user($conn);
-if (!is_editor_or_admin($currentUser)) {
-    header("Location: ../login.php");
-    exit;
-}
+$id = isset($_POST['id']) ? (int)$_POST['id'] : (isset($_GET['id']) ? (int)$_GET['id'] : 0);
 
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($id > 0) {
     // Delete comments first
-    $conn->query("DELETE FROM comments WHERE news_id = $id");
+    $stmt1 = $conn->prepare("DELETE FROM comments WHERE news_id = ?");
+    if ($stmt1) {
+        $stmt1->bind_param("i", $id);
+        $stmt1->execute();
+    }
+    
     // Delete article
-    $conn->query("DELETE FROM news WHERE id = $id");
+    $stmt2 = $conn->prepare("DELETE FROM news WHERE id = ?");
+    if ($stmt2) {
+        $stmt2->bind_param("i", $id);
+        $stmt2->execute();
+    }
 }
 
 header("Location: news.php?deleted=1");

@@ -9,7 +9,7 @@ abstract class DatabaseTestCase extends TestCase {
         require_once __DIR__ . '/../db.php';
         self::$db = $conn;
 
-        // Запускаем проверку структуры БД
+        // Ensure database schema and migrations
         if (function_exists('migrate_database_if_needed')) {
             migrate_database_if_needed(self::$db);
         }

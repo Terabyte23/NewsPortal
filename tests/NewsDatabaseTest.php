@@ -12,7 +12,7 @@ class NewsDatabaseTest extends DatabaseTestCase {
     public function testCreateAndFetchNewsArticle() {
         $title = "Uudis Test " . time();
         
-        // В таблице news используется колонка 'title' (или 'pealkiri')
+        // News table uses column 'title'
         $stmt = self::$db->prepare("INSERT INTO news (title) VALUES (?)");
         $this->assertNotFalse($stmt, "Prepare failed: " . self::$db->error);
         
@@ -45,13 +45,13 @@ class NewsDatabaseTest extends DatabaseTestCase {
     }
 
     public function testFetchNewsByCategory() {
-        // Создаем тестовую категорию
+        // Create test category
         $catName = 'TestCat_' . time();
         $resCat = self::$db->query("INSERT INTO category (name) VALUES ('$catName')");
         $this->assertTrue($resCat, "Category insert failed: " . self::$db->error);
         $catId = self::$db->insert_id;
 
-        // Вставляем новость с привязкой к созданной категории
+        // Insert news associated with category
         $resNews = self::$db->query("INSERT INTO news (title, category_id) VALUES ('Cat News', $catId)");
         $this->assertTrue($resNews, "News insert failed: " . self::$db->error);
 

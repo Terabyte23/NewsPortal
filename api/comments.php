@@ -19,7 +19,7 @@ if ($method === 'POST') {
         $authorName = $currentUser['name'] ?? $currentUser['login'];
         $userId = (int)$currentUser['id'];
     } else {
-        $userId = 'NULL';
+        $userId = null;
     }
 
     if ($newsId <= 0 || empty($text)) {
@@ -27,14 +27,24 @@ if ($method === 'POST') {
         exit;
     }
 
-    $textSafe = $conn->real_escape_string($text);
-    $authorSafe = $conn->real_escape_string($authorName);
+    // Sanitize author name length and text length
+    $authorName = mb_substr($authorName, 0, 100);
+    $text = mb_substr($text, 0, 2000);
     $now = date('Y-m-d H:i:s');
 
-    $sql = "INSERT INTO comments (news_id, text, date, user_id, author_name) 
-            VALUES ($newsId, '$textSafe', '$now', $userId, '$authorSafe')";
-    
-    if ($conn->query($sql)) {
+    if ($userId === null) {
+        $stmt = $conn->prepare("INSERT INTO comments (news_id, text, date, user_id, author_name) VALUES (?, ?, ?, NULL, ?)");
+        if ($stmt) {
+            $stmt->bind_param("isss", $newsId, $text, $now, $authorName);
+        }
+    } else {
+        $stmt = $conn->prepare("INSERT INTO comments (news_id, text, date, user_id, author_name) VALUES (?, ?, ?, ?, ?)");
+        if ($stmt) {
+            $stmt->bind_param("issis", $newsId, $text, $now, $userId, $authorName);
+        }
+    }
+
+    if (isset($stmt) && $stmt->execute()) {
         $newId = $conn->insert_id;
         echo json_encode([
             'success' => true,
@@ -47,7 +57,7 @@ if ($method === 'POST') {
             ]
         ]);
     } else {
-        echo json_encode(['success' => false, 'error' => 'Andmebaasi viga: ' . $conn->error]);
+        echo json_encode(['success' => false, 'error' => 'Andmebaasi viga: ' . ($stmt ? $stmt->error : $conn->error)]);
     }
     exit;
 }
@@ -64,7 +74,11 @@ if ($method === 'DELETE' || (isset($_GET['action']) && $_GET['action'] === 'dele
         exit;
     }
 
-    $conn->query("DELETE FROM comments WHERE id = $id");
+    $stmt = $conn->prepare("DELETE FROM comments WHERE id = ?");
+    if ($stmt) {
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+    }
     echo json_encode(['success' => true]);
     exit;
 }

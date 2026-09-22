@@ -1,11 +1,12 @@
 <?php
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/auth_check.php';
 $adminPage = 'seed';
 $pageTitle = 'Demo andmebaasi täitja';
 
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    admin_verify_csrf();
     // 1. Clear existing sample data if requested
     if (isset($_POST['wipe'])) {
         $conn->query("DELETE FROM comments");
@@ -22,7 +23,7 @@ Projektijuht rõhutas, et superarvuti ressurss on avatud nii kohalikele teadusas
 
 Eesti teadlaste sõnul aitab see samm hoida riiki maailma tehnoloogiainnovatsiooni esirinnas ning luua praktilisi lahendusi hariduse ja tervishoiu digitaliseerimiseks.",
             'category_id' => 1,
-            'image_url' => 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
+            'image_url' => 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80',
             'is_featured' => 1,
             'views' => 1420,
             'likes' => 84,
@@ -34,7 +35,7 @@ Eesti teadlaste sõnul aitab see samm hoida riiki maailma tehnoloogiainnovatsioo
 
 Õppejõudude sõnul võimaldab VR-tehnoloogia omandada keerulisi inseneri- ja disainioskusi oluliselt kiiremini. Laboris on 24 tipptasemel tööjaama RTX 50-seeria graafikakaartidega ja professionaalsed VR-peakomplektid.",
             'category_id' => 2,
-            'image_url' => 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80',
+            'image_url' => 'https://images.unsplash.com/photo-1592478411213-6153e4ebc07d?auto=format&fit=crop&w=1200&q=80',
             'is_featured' => 0,
             'views' => 980,
             'likes' => 45,
@@ -46,7 +47,7 @@ Eesti teadlaste sõnul aitab see samm hoida riiki maailma tehnoloogiainnovatsioo
 
 Teadlased jätkavad spektroskoopilisi vaatlusi, et selgitada välja planeedi täpsem keemiline koostis ja temperatuurirežiim.",
             'category_id' => 3,
-            'image_url' => 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80',
+            'image_url' => 'https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?auto=format&fit=crop&w=1200&q=80',
             'is_featured' => 0,
             'views' => 1250,
             'likes' => 92,
@@ -58,7 +59,7 @@ Teadlased jätkavad spektroskoopilisi vaatlusi, et selgitada välja planeedi tä
 
 Eksperdid soovitavad tungivalt uuendada operatsioonisüsteeme, kasutada mitmetasemelist autentimist (2FA) ning hoiduda tundmatute linkide avamisest.",
             'category_id' => 4,
-            'image_url' => 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80',
+            'image_url' => 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1200&q=80',
             'is_featured' => 0,
             'views' => 870,
             'likes' => 38,
@@ -70,7 +71,7 @@ Eksperdid soovitavad tungivalt uuendada operatsioonisüsteeme, kasutada mitmetas
 
 Ettevõtluse arendamise sihtasutus prognoosib järgnevateks aastateks uute kõrgtehnoloogiliste töökohtade lisandumist.",
             'category_id' => 5,
-            'image_url' => 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?auto=format&fit=crop&w=1200&q=80',
+            'image_url' => 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80',
             'is_featured' => 0,
             'views' => 640,
             'likes' => 29,
@@ -82,7 +83,7 @@ Ettevõtluse arendamise sihtasutus prognoosib järgnevateks aastateks uute kõrg
 
 Kuraatorite sõnul uurib näitus inimese ja algoritmi loovuse piire ning digitaalse keskkonna mõju linnakultuurile.",
             'category_id' => 6,
-            'image_url' => 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+            'image_url' => 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=1200&q=80',
             'is_featured' => 0,
             'views' => 510,
             'likes' => 61,
@@ -138,6 +139,7 @@ include 'header.php';
         </p>
 
         <form method="POST" action="seed.php">
+            <?= csrf_input() ?>
             <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 24px;">
                 <input type="checkbox" name="wipe" id="wipeCheck" value="1" checked style="width: 18px; height: 18px; accent-color: var(--primary);">
                 <label for="wipeCheck" style="margin-bottom: 0; cursor: pointer;">Asenda vanad testandmed uute kvaliteetsete uudistega</label>

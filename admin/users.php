@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/auth_check.php';
 $adminPage = 'users';
 $pageTitle = 'Kasutajate haldus';
 
@@ -9,21 +9,36 @@ if (!is_admin($currentUser)) {
 
 $msg = '';
 if (isset($_GET['toggle_role']) && isset($_GET['id'])) {
+    admin_verify_csrf();
     $uid = (int)$_GET['id'];
-    $uRes = $conn->query("SELECT status FROM users WHERE id = $uid");
-    if ($uRes && $uRes->num_rows > 0) {
-        $curStatus = $uRes->fetch_assoc()['status'];
-        $newStatus = ($curStatus === 'admin') ? 'user' : 'admin';
-        $conn->query("UPDATE users SET status = '$newStatus' WHERE id = $uid");
-        $msg = 'Kasutaja roll muudetud!';
+    $stmt = $conn->prepare("SELECT status FROM users WHERE id = ?");
+    if ($stmt) {
+        $stmt->bind_param("i", $uid);
+        $stmt->execute();
+        $uRes = $stmt->get_result();
+        if ($uRes && $uRes->num_rows > 0) {
+            $curStatus = $uRes->fetch_assoc()['status'];
+            $newStatus = ($curStatus === 'admin') ? 'user' : 'admin';
+            $upStmt = $conn->prepare("UPDATE users SET status = ? WHERE id = ?");
+            if ($upStmt) {
+                $upStmt->bind_param("si", $newStatus, $uid);
+                $upStmt->execute();
+                $msg = 'Kasutaja roll muudetud!';
+            }
+        }
     }
 }
 
 if (isset($_GET['del'])) {
+    admin_verify_csrf();
     $delId = (int)$_GET['del'];
-    if ($delId != $currentUser['id']) {
-        $conn->query("DELETE FROM users WHERE id = $delId");
-        $msg = 'Kasutaja kustutatud!';
+    if ($delId > 0 && $delId != $currentUser['id']) {
+        $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
+        if ($stmt) {
+            $stmt->bind_param("i", $delId);
+            $stmt->execute();
+            $msg = 'Kasutaja kustutatud!';
+        }
     }
 }
 
@@ -73,12 +88,12 @@ include 'header.php';
                         <td><?= $u['registratsion_date'] ?></td>
                         <td style="text-align: right;">
                             <div class="action-btns" style="justify-content: flex-end;">
-                                <a href="users.php?toggle_role=1&id=<?= $u['id'] ?>" class="action-btn-edit">
+                                <a href="users.php?toggle_role=1&id=<?= $u['id'] ?>&csrf_token=<?= csrf_token() ?>" class="action-btn-edit">
                                     <?= $u['status'] === 'admin' ? 'Tee tavakasutajaks' : 'Määra adminiks' ?>
                                 </a>
                                 <?php if ($u['id'] != $currentUser['id']): ?>
                                     <span style="color: var(--border-color);">|</span>
-                                    <a href="users.php?del=<?= $u['id'] ?>" class="action-btn-del" onclick="return confirm('Kustuta kasutaja?');">Kustuta</a>
+                                    <a href="users.php?del=<?= $u['id'] ?>&csrf_token=<?= csrf_token() ?>" class="action-btn-del" onclick="return confirm('Kustuta kasutaja?');">Kustuta</a>
                                 <?php endif; ?>
                             </div>
                         </td>

@@ -1,24 +1,33 @@
 <?php
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/auth_check.php';
 $adminPage = 'categories';
 $pageTitle = 'Rubriigid & Kategooriad';
 
 $msg = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_category'])) {
+    admin_verify_csrf();
     $name = trim($_POST['name'] ?? '');
     if (!empty($name)) {
-        $eName = $conn->real_escape_string($name);
-        $conn->query("INSERT INTO category (name) VALUES ('$eName')");
-        $msg = 'Uus rubriik edukalt lisatud!';
+        $stmt = $conn->prepare("INSERT INTO category (name) VALUES (?)");
+        if ($stmt) {
+            $stmt->bind_param("s", $name);
+            $stmt->execute();
+            $msg = 'Uus rubriik edukalt lisatud!';
+        }
     }
 }
 
 if (isset($_GET['del'])) {
+    admin_verify_csrf();
     $delId = (int)$_GET['del'];
     if ($delId > 0) {
-        $conn->query("DELETE FROM category WHERE id = $delId");
-        $msg = 'Rubriik kustutatud!';
+        $stmt = $conn->prepare("DELETE FROM category WHERE id = ?");
+        if ($stmt) {
+            $stmt->bind_param("i", $delId);
+            $stmt->execute();
+            $msg = 'Rubriik kustutatud!';
+        }
     }
 }
 
@@ -46,6 +55,7 @@ include 'header.php';
     <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 24px;">
         <h3 style="font-size: 1.125rem; font-weight: 800; margin-bottom: 16px;">Lisa uus rubriik</h3>
         <form method="POST" action="categories.php">
+            <?= csrf_input() ?>
             <input type="hidden" name="new_category" value="1">
             <div class="form-group">
                 <label>Rubriigi nimetus *</label>
@@ -74,7 +84,7 @@ include 'header.php';
                             <td><span class="badge-category"><?= htmlspecialchars($c['name']) ?></span></td>
                             <td><b><?= $c['article_count'] ?></b> tk</td>
                             <td style="text-align: right;">
-                                <a href="categories.php?del=<?= $c['id'] ?>" class="action-btn-del" onclick="return confirm('Kas oled kindel?');">Kustuta</a>
+                                <a href="categories.php?del=<?= $c['id'] ?>&csrf_token=<?= csrf_token() ?>" class="action-btn-del" onclick="return confirm('Kas oled kindel?');">Kustuta</a>
                             </td>
                         </tr>
                     <?php endwhile; ?>

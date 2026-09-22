@@ -21,7 +21,15 @@ if (!in_array($type, $allowedTypes) || $newsId <= 0) {
     exit;
 }
 
-$res = $conn->query("SELECT reactions, likes FROM news WHERE id = $newsId");
+$stmt = $conn->prepare("SELECT reactions, likes FROM news WHERE id = ?");
+if (!$stmt) {
+    echo json_encode(['success' => false, 'error' => 'Päringu viga']);
+    exit;
+}
+$stmt->bind_param("i", $newsId);
+$stmt->execute();
+$res = $stmt->get_result();
+
 if (!$res || $res->num_rows === 0) {
     echo json_encode(['success' => false, 'error' => 'Uudist ei leitud']);
     exit;
@@ -36,9 +44,13 @@ if (!isset($reactions[$type])) {
 $reactions[$type]++;
 
 $newLikes = (int)$row['likes'] + 1;
-$reactionsJson = $conn->real_escape_string(json_encode($reactions));
+$reactionsJson = json_encode($reactions);
 
-$conn->query("UPDATE news SET reactions = '$reactionsJson', likes = $newLikes WHERE id = $newsId");
+$upStmt = $conn->prepare("UPDATE news SET reactions = ?, likes = ? WHERE id = ?");
+if ($upStmt) {
+    $upStmt->bind_param("sii", $reactionsJson, $newLikes, $newsId);
+    $upStmt->execute();
+}
 
 echo json_encode([
     'success' => true,

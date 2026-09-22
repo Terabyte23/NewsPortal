@@ -3,35 +3,71 @@ require_once 'db.php';
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $login = trim($_POST['login'] ?? '');
-    $parol = trim($_POST['parol'] ?? '');
+    // CSRF verification
+    $token = $_POST['csrf_token'] ?? '';
+    if (!verify_csrf_token($token)) {
+        $error = 'Turvakontroll ebaõnnestus (vigane CSRF luba). Palun proovige uuesti.';
+    } else {
+        $login = trim($_POST['login'] ?? '');
+        $parol = trim($_POST['parol'] ?? '');
 
-    if (!empty($login) && !empty($parol)) {
-        $escaped = $conn->real_escape_string($login);
-        $res = $conn->query("SELECT * FROM users WHERE login = '$escaped' LIMIT 1");
-        
-        if ($res && $res->num_rows > 0) {
-            $user = $res->fetch_assoc();
-            // Check password (plain or md5/hash)
-            if ($user['parol'] === $parol || password_verify($parol, $user['parol'])) {
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['user_name'] = $user['name'];
-                $_SESSION['user_role'] = $user['status'];
-                
-                if (is_admin($user) || is_editor_or_admin($user)) {
-                    header("Location: admin/index.php");
+        if (!empty($login) && !empty($parol)) {
+            $stmt = $conn->prepare("SELECT * FROM users WHERE login = ? OR email = ? LIMIT 1");
+            if ($stmt) {
+                $stmt->bind_param("ss", $login, $login);
+                $stmt->execute();
+                $res = $stmt->get_result();
+
+                if ($res && $res->num_rows > 0) {
+                    $user = $res->fetch_assoc();
+                    $isPasswordCorrect = false;
+
+                    if (password_verify($parol, $user['parol'])) {
+                        $isPasswordCorrect = true;
+                        // Auto rehash if algorithm cost changed
+                        if (password_needs_rehash($user['parol'], PASSWORD_DEFAULT)) {
+                            $newHash = password_hash($parol, PASSWORD_DEFAULT);
+                            $rehashStmt = $conn->prepare("UPDATE users SET parol = ? WHERE id = ?");
+                            if ($rehashStmt) {
+                                $rehashStmt->bind_param("si", $newHash, $user['id']);
+                                $rehashStmt->execute();
+                            }
+                        }
+                    } elseif ($user['parol'] === $parol) {
+                        // Transparently migrate plain-text legacy password to bcrypt hash
+                        $isPasswordCorrect = true;
+                        $newHash = password_hash($parol, PASSWORD_DEFAULT);
+                        $rehashStmt = $conn->prepare("UPDATE users SET parol = ? WHERE id = ?");
+                        if ($rehashStmt) {
+                            $rehashStmt->bind_param("si", $newHash, $user['id']);
+                            $rehashStmt->execute();
+                        }
+                    }
+
+                    if ($isPasswordCorrect) {
+                        session_regenerate_id(true);
+                        $_SESSION['user_id'] = $user['id'];
+                        $_SESSION['user_name'] = $user['name'];
+                        $_SESSION['user_role'] = $user['status'];
+                        
+                        if (is_admin($user) || is_editor_or_admin($user)) {
+                            header("Location: admin/index.php");
+                        } else {
+                            header("Location: index.php");
+                        }
+                        exit;
+                    } else {
+                        $error = 'Vale parool!';
+                    }
                 } else {
-                    header("Location: index.php");
+                    $error = 'Kasutajat ei leitud!';
                 }
-                exit;
             } else {
-                $error = 'Vale parool!';
+                $error = 'Päringu ettevalmistamise viga: ' . $conn->error;
             }
         } else {
-            $error = 'Kasutajat ei leitud!';
+            $error = 'Palun täida kõik väljad!';
         }
-    } else {
-        $error = 'Palun täida kõik väljad!';
     }
 }
 
@@ -53,9 +89,10 @@ include 'includes/header.php';
         <?php endif; ?>
 
         <form method="POST" action="login.php">
+            <?= csrf_input() ?>
             <div class="form-group">
                 <label>Kasutajanimi või E-post</label>
-                <input type="text" name="login" id="loginField" required class="form-control" placeholder="admin või user">
+                <input type="text" name="login" id="loginField" required class="form-control" placeholder="admin või user" value="<?= isset($_POST['login']) ? htmlspecialchars($_POST['login']) : '' ?>">
             </div>
 
             <div class="form-group">

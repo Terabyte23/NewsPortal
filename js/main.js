@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initComments();
     initSharing();
     initNewsletter();
-    initAnnoyingAd();
 });
 
 // 1. THEME SWITCHER
@@ -445,106 +444,6 @@ function showToast(message) {
 
 function escapeHtml(text) {
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-    return text.replace(/[&<>"']/g, m => map[m]);
+    return String(text).replace(/[&<>"']/g, m => map[m]);
 }
 
-// 11. ANNOYING MUSOR DROP AD BEHAVIOR
-let closeAttempts = 0;
-
-function initAnnoyingAd() {
-    const banner = document.getElementById('musorDropBanner');
-    const closeBtn = document.getElementById('adCloseBtn');
-    if (!banner || !closeBtn) return;
-
-    // Running away close button on hover (dodge cursor!)
-    closeBtn.addEventListener('mouseenter', () => {
-        if (closeAttempts < 3) {
-            const randX = (Math.random() - 0.5) * 80;
-            const randY = (Math.random() - 0.5) * 60;
-            closeBtn.style.transform = `translate(${randX}px, ${randY}px)`;
-        }
-    });
-
-    // Countdown timer that stays urgent
-    let secondsLeft = 49;
-    const timerEl = document.getElementById('adCountdown');
-    if (timerEl) {
-        setInterval(() => {
-            secondsLeft--;
-            if (secondsLeft <= 0) secondsLeft = 59;
-            const s = secondsLeft < 10 ? '0' + secondsLeft : secondsLeft;
-            timerEl.textContent = '00:' + s;
-        }, 1000);
-    }
-
-    // Occasional subtle vibration attention-grabber
-    setInterval(() => {
-        banner.style.filter = 'drop-shadow(0 0 35px #ff0055)';
-        setTimeout(() => {
-            banner.style.filter = '';
-        }, 800);
-    }, 8000);
-}
-
-function handleAdClose(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    closeAttempts++;
-
-    const banner = document.getElementById('musorDropBanner');
-    if (!banner) return;
-
-    if (closeAttempts === 1) {
-        showToast('⚠️ Kas oled kindel? Kaotad kohe 500€ tasuta saldo!');
-        const closeBtn = document.getElementById('adCloseBtn');
-        if (closeBtn) closeBtn.style.transform = 'none';
-    } else if (closeAttempts === 2) {
-        showToast('🎁 VIIMANE VÕIMALUS: Kasuta koodi NEWSPORTAL enne sulgemist!');
-    } else {
-        banner.style.display = 'none';
-        showToast('Reklaam suletud... aga boonus ootab sind ikka! 😉');
-
-        // Respawn after 15 seconds!
-        setTimeout(() => {
-            banner.style.display = 'flex';
-            banner.style.animation = 'adShake 0.6s ease-in-out, adBorderBlink 1.2s infinite alternate';
-            showToast('🔥 MUSOR DROP ON TAGASI! Ära maga maha!');
-            closeAttempts = 0;
-        }, 15000);
-    }
-}
-
-function playBeep() {
-    try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.frequency.value = 880;
-        gain.gain.value = 0.1;
-        osc.start();
-        setTimeout(() => {
-            osc.frequency.value = 1760;
-            setTimeout(() => {
-                osc.stop();
-                ctx.close();
-            }, 100);
-        }, 80);
-    } catch(err) {
-        // AudioContext not allowed without gesture
-    }
-}
-
-// Toggle mute/unmute on the ad video
-function adUnmute() {
-    const video = document.getElementById('adVideo');
-    const btn = document.getElementById('adUnmuteBtn');
-    if (!video || !btn) return;
-    video.muted = !video.muted;
-    btn.textContent = video.muted ? '🔇' : '🔊';
-    // Ensure video is playing after user gesture
-    if (!video.muted) {
-        video.play().catch(() => { video.muted = true; btn.textContent = '🔇'; });
-    }
-}

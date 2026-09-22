@@ -21,7 +21,7 @@ class FeaturesTest extends DatabaseTestCase {
         self::$db->query("INSERT INTO news (title) VALUES ('Article for comment')");
         $newsId = self::$db->insert_id;
 
-        // Автоматически находим колонку для текста комментария в вашей БД
+        // Automatically detect comment text column in database
         $commentColumn = null;
         $columnsRes = self::$db->query("SHOW COLUMNS FROM `comments`");
         if ($columnsRes) {
@@ -34,7 +34,7 @@ class FeaturesTest extends DatabaseTestCase {
             }
         }
 
-        // Если специфичная колонка не найдена, берем любое текстовое/varchar поле кроме id/news_id/user_id/created_at
+        // If specific column is not found, fallback to any text/varchar field
         if (!$commentColumn && $columnsRes) {
             $columnsRes->data_seek(0);
             while ($col = $columnsRes->fetch_assoc()) {

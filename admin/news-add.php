@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/auth_check.php';
 $adminPage = 'news-add';
 $pageTitle = 'Lisa uus artikkel';
 
@@ -9,29 +9,28 @@ $success = '';
 $categories = $conn->query("SELECT * FROM category ORDER BY id ASC");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    admin_verify_csrf();
     $title = trim($_POST['title'] ?? '');
     $text = trim($_POST['text'] ?? '');
     $catId = (int)($_POST['category_id'] ?? 1);
     $imageUrl = trim($_POST['image_url'] ?? '');
     $tags = trim($_POST['tags'] ?? '');
     $isFeatured = isset($_POST['is_featured']) ? 1 : 0;
-    $userId = (int)$currentUser['id'];
+    $userId = (int)($currentUser['id'] ?? 1);
 
     if (!empty($title) && !empty($text)) {
-        $eTitle = $conn->real_escape_string($title);
-        $eText = $conn->real_escape_string($text);
-        $eImg = $conn->real_escape_string($imageUrl);
-        $eTags = $conn->real_escape_string($tags);
-
-        $sql = "INSERT INTO news (title, text, picture, category_id, user_id, image_url, is_featured, tags, created_at)
-                VALUES ('$eTitle', '$eText', '', $catId, $userId, '$eImg', $isFeatured, '$eTags', NOW())";
-        
-        if ($conn->query($sql)) {
-            $newId = $conn->insert_id;
-            header("Location: news.php?success=1");
-            exit;
+        $stmt = $conn->prepare("INSERT INTO news (title, text, picture, category_id, user_id, image_url, is_featured, tags, created_at)
+                                VALUES (?, ?, '', ?, ?, ?, ?, ?, NOW())");
+        if ($stmt) {
+            $stmt->bind_param("ssiisis", $title, $text, $catId, $userId, $imageUrl, $isFeatured, $tags);
+            if ($stmt->execute()) {
+                header("Location: news.php?success=1");
+                exit;
+            } else {
+                $error = 'Andmebaasi viga: ' . $stmt->error;
+            }
         } else {
-            $error = 'Andmebaasi viga: ' . $conn->error;
+            $error = 'Päringu ettevalmistamise viga: ' . $conn->error;
         }
     } else {
         $error = 'Pealkiri ja artikli sisu on kohustuslikud!';
@@ -54,7 +53,7 @@ include 'header.php';
     <?php endif; ?>
 
     <form method="POST" action="news-add.php" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 30px;">
-        
+        <?= csrf_input() ?>
         <div class="form-group">
             <label>Artikli pealkiri *</label>
             <input type="text" name="title" required class="form-control" placeholder="Sisesta kõlav ja informatiivne pealkiri...">

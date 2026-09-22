@@ -54,9 +54,6 @@
                     <button type="submit" class="btn btn-primary-sm">Telli</button>
                 </div>
             </form>
-            <div class="footer-badge">
-                <span>⚡ Powered by PHP 8 & MySQL</span>
-            </div>
         </div>
 
     </div>

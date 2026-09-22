@@ -7,12 +7,12 @@ class UserManagementTest extends DatabaseTestCase {
         $login = "testuser_" . time();
         $email = "test@newsportal.ee";
 
-        // Создаем пользователя
+        // Create user
         $stmt = self::$db->prepare("INSERT INTO users (name, email, login, parol, status) VALUES ('Test', ?, ?, 'pass123', 'user')");
         $stmt->bind_param("ss", $email, $login);
         $this->assertTrue($stmt->execute());
 
-        // Проверка дубликата
+        // Duplicate check
         $check = self::$db->query("SELECT id FROM users WHERE login = '$login'");
         $this->assertEquals(1, $check->num_rows);
     }

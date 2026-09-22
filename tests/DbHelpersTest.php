@@ -1,12 +1,12 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
-// Подключаем тестируемый файл
+// Include tested file
 require_once __DIR__ . '/../db.php';
 
 class DbHelpersTest extends TestCase {
 
-    // --- 1. Тесты функции calculate_reading_time ---
+    // --- 1. calculate_reading_time tests ---
 
     public function testCalculateReadingTimeReturnsMinimumOneMinute() {
         $text = "Lühike tekst.";
@@ -14,7 +14,7 @@ class DbHelpersTest extends TestCase {
     }
 
     public function testCalculateReadingTimeForLongText() {
-        // 360 латинских слов без спецсимволов -> 360 / 180 = 2 минуты
+        // 360 words -> 360 / 180 = 2 minutes
         $words = implode(' ', array_fill(0, 360, 'word'));
         $this->assertEquals(2, calculate_reading_time($words));
     }
@@ -24,7 +24,7 @@ class DbHelpersTest extends TestCase {
         $this->assertEquals(1, calculate_reading_time($textWithHtml));
     }
 
-    // --- 2. Тесты проверки ролей пользователей ---
+    // --- 2. User roles verification tests ---
 
     public function testIsAdminReturnsTrueForAdminStatuses() {
         $adminUser = ['status' => 'admin'];
@@ -60,7 +60,7 @@ class DbHelpersTest extends TestCase {
         $this->assertFalse(is_editor_or_admin(null));
     }
 
-    // --- 3. Тесты форматирования времени и дат ---
+    // --- 3. Date & time formatting tests ---
 
     public function testFormatTimeAgoJustNow() {
         $now = date('Y-m-d H:i:s');
@@ -97,7 +97,7 @@ class DbHelpersTest extends TestCase {
         $this->assertEquals('Täna', format_estonian_date(null));
     }
 
-    // --- 4. Тесты функции get_article_image ---
+    // --- 4. get_article_image tests ---
 
     public function testGetArticleImageReturnsExplicitImageUrl() {
         $news = [
@@ -109,7 +109,7 @@ class DbHelpersTest extends TestCase {
 
     public function testGetArticleImageFallbackToUnsplashForNonExistingLocalFile() {
         $news = [
-            'id' => 999, // Используем заведомо несуществующий ID
+            'id' => 999, // Non-existent ID for fallback test
             'image_url' => null
         ];
         $image = get_article_image($news);

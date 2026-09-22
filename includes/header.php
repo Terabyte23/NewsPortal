@@ -58,11 +58,6 @@ if ($breakingResult) {
                 <span class="weather-icon">⛅</span>
                 <span class="weather-text">Tallinn +18°C</span>
             </div>
-            <span class="divider-dot">•</span>
-            <div class="crypto-ticker">
-                <span class="crypto-item">EUR/USD <b>1.092</b> <small class="text-green">▲</small></span>
-                <span class="crypto-item">BTC <b>$94,520</b> <small class="text-green">+2.4%</small></span>
-            </div>
         </div>
         
         <div class="top-right">

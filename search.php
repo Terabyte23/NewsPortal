@@ -6,16 +6,20 @@ $pageTitle = 'Otsing: ' . ($q ? htmlspecialchars($q) : 'Kõik uudised');
 
 $results = [];
 if (!empty($q)) {
-    $escaped = $conn->real_escape_string($q);
-    $sql = "SELECT n.*, c.name AS category_name 
+    $likeParam = '%' . $q . '%';
+    $stmt = $conn->prepare("SELECT n.*, c.name AS category_name 
             FROM news n 
             LEFT JOIN category c ON n.category_id = c.id 
-            WHERE n.title LIKE '%$escaped%' OR n.text LIKE '%$escaped%' OR n.tags LIKE '%$escaped%'
-            ORDER BY n.id DESC";
-    $res = $conn->query($sql);
-    if ($res) {
-        while ($row = $res->fetch_assoc()) {
-            $results[] = $row;
+            WHERE n.title LIKE ? OR n.text LIKE ? OR n.tags LIKE ?
+            ORDER BY n.id DESC");
+    if ($stmt) {
+        $stmt->bind_param("sss", $likeParam, $likeParam, $likeParam);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        if ($res) {
+            while ($row = $res->fetch_assoc()) {
+                $results[] = $row;
+            }
         }
     }
 }

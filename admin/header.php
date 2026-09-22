@@ -1,11 +1,5 @@
 <?php
-require_once __DIR__ . '/../db.php';
-
-$currentUser = get_logged_in_user($conn);
-if (!is_editor_or_admin($currentUser)) {
-    header("Location: ../login.php");
-    exit;
-}
+require_once __DIR__ . '/auth_check.php';
 
 $adminPage = $adminPage ?? 'dashboard';
 ?>

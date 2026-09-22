@@ -8,7 +8,7 @@ class LogoutTest extends TestCase {
         $_SESSION['user_id'] = 1;
         $_SESSION['user_name'] = 'TestUser';
 
-        // Имитируем логику logout.php
+        // Simulate logout.php logic
         $_SESSION = [];
         session_destroy();
 

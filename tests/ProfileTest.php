@@ -7,7 +7,7 @@ class ProfileTest extends TestCase {
         $_SESSION = [];
         $currentUser = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 
-        $this->assertNull($currentUser, 'Пользователь должен быть не авторизован');
+        $this->assertNull($currentUser, 'Kasutaja ei tohi olla sisse logitud');
     }
 
     public function testProfileUpdateQueryGeneration() {

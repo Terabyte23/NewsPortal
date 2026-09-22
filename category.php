@@ -4,8 +4,14 @@ require_once 'db.php';
 $catId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $activeCategory = $catId;
 
-$catRes = $conn->query("SELECT * FROM category WHERE id = $catId");
-$category = ($catRes && $catRes->num_rows > 0) ? $catRes->fetch_assoc() : null;
+$stmtCat = $conn->prepare("SELECT * FROM category WHERE id = ? LIMIT 1");
+$category = null;
+if ($stmtCat) {
+    $stmtCat->bind_param("i", $catId);
+    $stmtCat->execute();
+    $catRes = $stmtCat->get_result();
+    $category = ($catRes && $catRes->num_rows > 0) ? $catRes->fetch_assoc() : null;
+}
 
 if (!$category) {
     header("Location: index.php");
@@ -14,14 +20,19 @@ if (!$category) {
 
 $pageTitle = $category['name'] . ' uudised';
 
-$gridSql = "SELECT n.*, c.name AS category_name, u.name AS author_name,
+$stmtGrid = $conn->prepare("SELECT n.*, c.name AS category_name, u.name AS author_name,
             (SELECT COUNT(*) FROM comments cm WHERE cm.news_id = n.id) AS comment_count
             FROM news n
             LEFT JOIN category c ON n.category_id = c.id
             LEFT JOIN users u ON n.user_id = u.id
-            WHERE n.category_id = $catId
-            ORDER BY n.id DESC";
-$gridRes = $conn->query($gridSql);
+            WHERE n.category_id = ?
+            ORDER BY n.id DESC");
+$gridRes = null;
+if ($stmtGrid) {
+    $stmtGrid->bind_param("i", $catId);
+    $stmtGrid->execute();
+    $gridRes = $stmtGrid->get_result();
+}
 
 include 'includes/header.php';
 ?>

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/auth_check.php';
 $adminPage = 'news';
 $pageTitle = 'Muuda artiklit';
 
@@ -9,8 +9,11 @@ if ($id <= 0) {
     exit;
 }
 
-$newsRes = $conn->query("SELECT * FROM news WHERE id = $id");
-$news = ($newsRes && $newsRes->num_rows > 0) ? $newsRes->fetch_assoc() : null;
+$stmt = $conn->prepare("SELECT * FROM news WHERE id = ? LIMIT 1");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$res = $stmt->get_result();
+$news = ($res && $res->num_rows > 0) ? $res->fetch_assoc() : null;
 
 if (!$news) {
     die("Uudist ei leitud.");
@@ -18,6 +21,7 @@ if (!$news) {
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    admin_verify_csrf();
     $title = trim($_POST['title'] ?? '');
     $text = trim($_POST['text'] ?? '');
     $catId = (int)($_POST['category_id'] ?? 1);
@@ -26,25 +30,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $isFeatured = isset($_POST['is_featured']) ? 1 : 0;
 
     if (!empty($title) && !empty($text)) {
-        $eTitle = $conn->real_escape_string($title);
-        $eText = $conn->real_escape_string($text);
-        $eImg = $conn->real_escape_string($imageUrl);
-        $eTags = $conn->real_escape_string($tags);
-
-        $sql = "UPDATE news SET 
-                title = '$eTitle', 
-                text = '$eText', 
-                category_id = $catId, 
-                image_url = '$eImg', 
-                is_featured = $isFeatured, 
-                tags = '$eTags'
-                WHERE id = $id";
-        
-        if ($conn->query($sql)) {
-            header("Location: news.php?updated=1");
-            exit;
+        $upStmt = $conn->prepare("UPDATE news SET title = ?, text = ?, category_id = ?, image_url = ?, is_featured = ?, tags = ? WHERE id = ?");
+        if ($upStmt) {
+            $upStmt->bind_param("ssisisi", $title, $text, $catId, $imageUrl, $isFeatured, $tags, $id);
+            if ($upStmt->execute()) {
+                header("Location: news.php?updated=1");
+                exit;
+            } else {
+                $error = 'Viga uuendamisel: ' . $upStmt->error;
+            }
         } else {
-            $error = 'Viga uuendamisel: ' . $conn->error;
+            $error = 'Päringu viga: ' . $conn->error;
         }
     } else {
         $error = 'Täida nõutud väljad!';
@@ -71,7 +67,7 @@ include 'header.php';
     <?php endif; ?>
 
     <form method="POST" action="news-edit.php?id=<?= $news['id'] ?>" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 30px;">
-        
+        <?= csrf_input() ?>
         <div class="form-group">
             <label>Artikli pealkiri *</label>
             <input type="text" name="title" value="<?= htmlspecialchars($news['title']) ?>" required class="form-control">

@@ -58,6 +58,33 @@ Asub aadressil **`/admin/`** ja on kaitstud rollipõhise autentimisega:
 
 ---
 
+## 🛡️ Turvalisus ja kaitsemeetmed (Security & Code Quality)
+
+Projekt vastab OWASP Top 10 turvastandarditele:
+- **Paroolide krüpteerimine**: Paroolid räsitakse tööstusstandardi turvalise bcrypt algoritmiga (`password_hash` / `password_verify`).
+- **Päringute turvalisus (SQL Injection kaitse)**: Kõik andmebaasipäringud kasutavad ettevalmistatud päringuid (Prepared Statements `mysqli_stmt`).
+- **CSRF kaitse (Cross-Site Request Forgery)**: Kõik vormid ja olekut muutvad operatsioonid on kaitstud krüptograafiliselt turvaliste unikaalsete sessiooni CSRF-lubadega (`csrf_token()`).
+- **XSS kaitse (Cross-Site Scripting)**: Kõik kasutajasisendid filtreeritakse ja väljastamisel rakendatakse HTML-olemites kodeerimist (`htmlspecialchars` ja JS `escapeHtml`).
+- **Sessiooniturve (Session Hardening)**: Küpsised on konfigureeritud lippudega `HttpOnly` ja `SameSite=Lax`. Sisselogimisel uuendatakse sessiooni ID (`session_regenerate_id(true)`), mis välistab Session Fixation ründed.
+- **Tsentraliseeritud ligipääsukontroll (RBAC)**: Toimetuse halduspaneeli failid on kaitstud tsentraalse `admin/auth_check.php` valvuriga.
+- **Zero-Config automaatne paigaldus**: Andmebaasi puudumisel loob `db.php` vajaliku andmebaasi ja tabelid automaatselt esimesel käivitamisel.
+- **Täielik lokaliseerimine**: Kogu süsteem, kasutajaliides ja testid on koostatud korrektses eesti ja inglise keeles ilma võõrkeelsete fragmentideta.
+
+---
+
+## 🧪 Automaattestid (Automated Tests)
+
+Projekt sisaldab põhjalikku PHPUnit testikomplekti, mis katab andmebaasi funktsioonid, autentimise, profiili ja turvamehhanismid:
+
+```bash
+# Käivita testid Windowsi käsurealt:
+test.bat
+
+# Või otse PHPUnit kaudu:
+C:\xampp\php\php.exe phpunit.phar
+```
+*Tulemus: 33 testi, 73 kontrolli (100% OK).*
+
 ## 🔑 Testkontod (Demo Credentials)
 
 Sisselogimislehel [login.php](login.php) on kiirnupud testandmete sisestamiseks:
