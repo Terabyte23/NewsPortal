@@ -19,3 +19,20 @@ Võimalus lugejatel tellida veebibrauseri kaudu koheseid teavitusi (**Web Push N
 - **Serveripool:** VAPID (Voluntary Application Server Identification) krüptovõtmete paar ja PHP teek `web-push-libs/web-push-php`.
 - **Andmebaas:** Uus tabel `push_subscriptions` (`id`, `user_id`, `endpoint`, `p256dh_key`, `auth_token`, `topics`, `created_at`).
 - **Haldusliides:** Toimetajale artikli avaldamisel valikuvõimalus: *"Saada teavitus selle teema tellijatele"*.
+
+---
+
+## 2. Tehisintellektil (AI) põhinev lühikokkuvõtja ja semantilised sisu soovitused (AI News Digest & Smart Recommendations)
+
+### Kirjeldus:
+Iga pikema uudiseartikli juurde genereeritakse automaatselt tehisintellekti abil 3–4 täpipunktiga lühikokkuvõte (**"TL;DR / Loe 20 sekundiga"**), mis kuvatakse artikli päises eraldi kaardina. Lisaks võetakse kasutusele nutikas soovitusmootor, mis analüüsib loetud artikli sisu ja pakub välja semantiliselt seotud lugusid ja taustamaterjale, mitte ainult suvalisi sama rubriigi artikleid.
+
+### Äriline ja kasutajakogemuse väärtus (Kasu ja mõju):
+1. **Kohanemine kiire elutempoga:** Tänapäeva lugejad hindavad aega. Võimalus haarata artikli iva paari sekundiga parandab oluliselt mobiilsete lugejate rahulolu ja vähendab lehelt lahkumise määra (Bounce Rate).
+2. **Seansi kestuse ja lehevaatamiste kasv:** Semantiliselt täpsed soovitused (nt artiklile *"Eesti superarvuti"* soovitatakse *"Kvanttehnoloogia läbimurre"*, mitte suvalist spordiuudist) tõstavad klikkimise määra (CTR) 25–40%.
+3. **Toimetuse produktiivsuse tõus:** AI aitab toimetajal automaatselt genereerida artiklile teemakohaseid silte/märksõnu (Tags) ja pealkirja alternatiive, hoides kokku väärtuslikku tööaega.
+
+### Tehniline arhitektuur ja teostuse kava:
+- **AI Integratsioon:** Kerge ja kuluefektiivne LLM API (Google Gemini API või OpenAI GPT-4o-mini) integratsioon artikli avaldamise ja toimetamise etapis (`admin/news-add.php`, `admin/news-edit.php`).
+- **Vahemällu talletamine (Caching):** Genereeritud kokkuvõte salvestatakse andmebaasi veerus `news.ai_summary` ja sildid tabelis `news_tags`. Veebilehe laadimisel ei tehta korduvaid välispäringuid, tagades kiire lehe avanemise (< 0.5s).
+- **Frontend UI:** Kokkuvõtte kaart stiilse gradient-äärisega ja laiendatava *"Loe täismahus"* nupuga.
