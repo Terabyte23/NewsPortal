@@ -35,3 +35,21 @@ Avalikes liidestes [`api/reactions.php`](api/reactions.php) ja [`api/comments.ph
 - Luua päringute piiraja (Throttling / Rate-Limiting) avalikele API otspunktidele (nt maksimaalselt 5–10 reaktsiooni minutis ühelt IP-aadressilt).
 - Lisada külaliste kommentaarivormile Honeypot-tühi väli või Cloudflare Turnstile / reCAPTCHA integratsioon.
 
+---
+
+## 3. Leheküljendamise (Pagination) puudumine uudiste ja kommentaaride nimekirjades
+
+### Kirjeldus:
+Avalehel ([`index.php`](index.php)), halduspaneelis ([`admin/news.php`](admin/news.php), [`admin/comments.php`](admin/comments.php)) ja artikli kommentaarides ([`news.php`](news.php)) tehakse andmebaasipäringud ilma `LIMIT` ja `OFFSET` klausliteta (nt `SELECT cm.*, n.title ... ORDER BY cm.id DESC` laeb korraga mällu absoluutselt kõik süsteemis olevad kommentaarid).
+
+### Tagajärjed ja riskid:
+1. **Mälumahu ületamine (RAM Exhaustion):** Kui andmebaasis on sadu või tuhandeid artikleid ja kommentaare, püüab PHP korraga laadida mitmeid megabaite toorandmeid, mis toob kaasa `Fatal Error: Allowed memory size exhausted` vea.
+2. **Kliendi brauseri aeglustumine:** Sadade või tuhandete DOM-kaartide korraga brauserisse joonistamine tekitab lehe kerimisel märgatavat hangumist ja halvendab oluliselt lehe esmast laadimiskiirust (Core Web Vitals / LCP).
+3. **Võrgu- ja serverikoormus:** Iga päringuga kantakse üle tohutu hulk mittevajalikku infot, mis koormab nii veebiserverit kui ka mobiilse internetiga lugejaid.
+
+### Soovituslik lahendus:
+- Rakendada uudiste nimekirjadele klassikaline leheküljendamine (nt 9–12 uudist lehe kohta) koos URL-i parameetriga `?page=1`.
+- Artikli kommentaariumis võtta kasutusele kas leheküljed või dünaamiline AJAX-nupp "Laadi järgmised 10 kommentaari".
+- Halduspaneelis lisada tabelitele leheküljendamise ja kirjete arvu valiku võimalused.
+
+
