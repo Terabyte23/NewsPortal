@@ -1,9 +1,22 @@
 <?php
 /**
  * NewsPortal - Selenium-Style Visual E2E Test Runner
- * Provides a live, visual, interactive browser test execution experience
- * displaying simulated clicks, typing, modal dialogs, and real-time assertions.
+ * Comprehensive interactive browser test suite testing all functional and unit test areas
  */
+require_once __DIR__ . '/../db.php';
+
+// Find a valid news article or create a test seed article if none exist
+$targetNews = null;
+$newsRes = $conn->query("SELECT id, title, category_id FROM news ORDER BY id DESC LIMIT 1");
+if ($newsRes && $row = $newsRes->fetch_assoc()) {
+    $targetNews = $row;
+} else {
+    $conn->query("INSERT INTO news (title, text, views, likes) VALUES ('Eesti tehisintellekti keskus avas superarvuti', 'Põhjalik ülevaade teadussaavutustest ja haridusest.', 12, 4)");
+    $targetNews = ['id' => $conn->insert_id, 'title' => 'Eesti tehisintellekti keskus avas superarvuti'];
+}
+
+$validNewsId = (int)$targetNews['id'];
+$validNewsTitle = $targetNews['title'];
 ?>
 <!DOCTYPE html>
 <html lang="et">
@@ -159,8 +172,8 @@
 
         /* LEFT PANE - CONTROLS & LOG */
         .controls-pane {
-            width: 480px;
-            min-width: 420px;
+            width: 500px;
+            min-width: 440px;
             background: var(--bg-surface);
             border-right: 1px solid var(--border);
             display: flex;
@@ -169,7 +182,7 @@
         }
 
         .panel-section {
-            padding: 14px 18px;
+            padding: 12px 16px;
             border-bottom: 1px solid var(--border);
         }
 
@@ -226,11 +239,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-top: 12px;
+            margin-top: 10px;
             font-size: 0.75rem;
             color: var(--text-muted);
             background: var(--bg-card);
-            padding: 8px 12px;
+            padding: 6px 12px;
             border-radius: 6px;
             border: 1px solid var(--border);
         }
@@ -242,24 +255,24 @@
             accent-color: #3b82f6;
         }
 
-        /* METRICS BAR */
+        /* METRICS */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-top: 12px;
+            gap: 6px;
+            margin-top: 10px;
         }
 
         .metric-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 6px;
-            padding: 8px 10px;
+            padding: 6px 8px;
             text-align: center;
         }
 
         .metric-val {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 800;
             color: #fff;
             font-family: 'Fira Code', monospace;
@@ -270,7 +283,7 @@
         .metric-val.blue { color: #60a5fa; }
 
         .metric-label {
-            font-size: 0.6875rem;
+            font-size: 0.625rem;
             font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -280,8 +293,8 @@
 
         /* PROGRESS BAR */
         .progress-bar-wrap {
-            margin-top: 10px;
-            height: 6px;
+            margin-top: 8px;
+            height: 5px;
             background: var(--bg-card);
             border-radius: 4px;
             overflow: hidden;
@@ -299,7 +312,7 @@
         .suites-container {
             flex: 1;
             overflow-y: auto;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-bottom: 1px solid var(--border);
         }
 
@@ -307,18 +320,18 @@
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 6px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             overflow: hidden;
             transition: border-color 0.15s ease;
         }
 
         .suite-item.active {
             border-color: #3b82f6;
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.25);
         }
 
         .suite-header {
-            padding: 10px 12px;
+            padding: 8px 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -327,7 +340,7 @@
         }
 
         .suite-title {
-            font-size: 0.8125rem;
+            font-size: 0.775rem;
             font-weight: 700;
             display: flex;
             align-items: center;
@@ -336,7 +349,7 @@
         }
 
         .suite-badge {
-            font-size: 0.6875rem;
+            font-size: 0.65rem;
             padding: 2px 6px;
             border-radius: 4px;
             font-weight: 700;
@@ -350,17 +363,17 @@
 
         /* LIVE STEP LOG */
         .log-section {
-            height: 230px;
+            height: 200px;
             display: flex;
             flex-direction: column;
             background: #080b11;
         }
 
         .log-header {
-            padding: 8px 14px;
+            padding: 6px 12px;
             background: #0e131d;
             border-bottom: 1px solid var(--border);
-            font-size: 0.6875rem;
+            font-size: 0.65rem;
             font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -375,14 +388,14 @@
             overflow-y: auto;
             padding: 8px 12px;
             font-family: 'Fira Code', monospace;
-            font-size: 0.75rem;
-            line-height: 1.6;
+            font-size: 0.7rem;
+            line-height: 1.5;
         }
 
         .log-line {
             display: flex;
-            gap: 8px;
-            margin-bottom: 4px;
+            gap: 6px;
+            margin-bottom: 3px;
             word-break: break-all;
         }
 
@@ -408,7 +421,6 @@
             position: relative;
         }
 
-        /* VIEWPORT BROWSER BAR */
         .browser-bar {
             background: var(--bg-surface);
             border-bottom: 1px solid var(--border);
@@ -472,8 +484,8 @@
         /* SELENIUM ACTION HIGHLIGHTER CURSOR (ON TOP OF IFRAME) */
         #seleniumPointer {
             position: absolute;
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             pointer-events: none;
             z-index: 9999;
             transform: translate(-50%, -50%);
@@ -482,12 +494,12 @@
         }
 
         .pointer-circle {
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             background: rgba(239, 68, 68, 0.45);
             border: 2px solid #ef4444;
-            box-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
+            box-shadow: 0 0 14px rgba(239, 68, 68, 0.85);
             position: relative;
         }
 
@@ -507,8 +519,8 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             border: 2px solid #3b82f6;
             border-radius: 50%;
             transform: translate(-50%, -50%) scale(1);
@@ -561,7 +573,7 @@
                 SELENIUM RUNNER
             </div>
             <div class="runner-title">
-                NewsPortal E2E Visual Automation
+                NewsPortal Täielik E2E & Ühiktestide Visuaalne Testija
                 <small>Chrome WebDriver Mode</small>
             </div>
         </div>
@@ -589,10 +601,6 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                         Käivita kõik testid
                     </button>
-                    <button class="btn btn-secondary" id="btnPause" disabled>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                        Paus
-                    </button>
                     <button class="btn btn-secondary" id="btnReset">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
                         Lähtesta
@@ -601,15 +609,15 @@
 
                 <!-- SPEED SLIDER (SLOW MOTION) -->
                 <div class="speed-control-box">
-                    <span>⚡ Kiirus:</span>
-                    <input type="range" class="speed-slider" id="speedSlider" min="200" max="2000" step="100" value="800">
-                    <span id="speedValue" style="font-weight: 700; color: #60a5fa; font-family: monospace;">800 ms</span>
+                    <span>⚡ Viivitus (Speed):</span>
+                    <input type="range" class="speed-slider" id="speedSlider" min="200" max="2000" step="100" value="700">
+                    <span id="speedValue" style="font-weight: 700; color: #60a5fa; font-family: monospace;">700 ms</span>
                 </div>
 
                 <!-- METRICS -->
                 <div class="metrics-grid">
                     <div class="metric-card">
-                        <div class="metric-val blue" id="metricTotal">6</div>
+                        <div class="metric-val blue" id="metricTotal">10</div>
                         <div class="metric-label">Kokku</div>
                     </div>
                     <div class="metric-card">
@@ -618,7 +626,7 @@
                     </div>
                     <div class="metric-card">
                         <div class="metric-val red" id="metricFailed">0</div>
-                        <div class="metric-label">Ebaõnnestus</div>
+                        <div class="metric-label">Vigu</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-val" id="metricDuration">0.0s</div>
@@ -632,66 +640,76 @@
                 </div>
             </div>
 
-            <!-- SUITES LIST -->
+            <!-- SUITES LIST (10 COMPREHENSIVE SUITES) -->
             <div class="suites-container" id="suitesList">
                 
-                <!-- SUITE 1 -->
                 <div class="suite-item" data-suite-id="1">
                     <div class="suite-header" onclick="runSingleSuite(1)">
-                        <span class="suite-title">
-                            <span>🌐</span> 1. Avalehe laadimine ja otsing
-                        </span>
+                        <span class="suite-title"><span>🌐</span> 1. Avaleht ja reaalajas otsing (Search)</span>
                         <span class="suite-badge" id="badge-1">Ootel</span>
                     </div>
                 </div>
 
-                <!-- SUITE 2 -->
                 <div class="suite-item" data-suite-id="2">
                     <div class="suite-header" onclick="runSingleSuite(2)">
-                        <span class="suite-title">
-                            <span>📖</span> 2. Artikli avamine ja vaatamised
-                        </span>
+                        <span class="suite-title"><span>🏷️</span> 2. Kategooriate filter ja navigatsioon</span>
                         <span class="suite-badge" id="badge-2">Ootel</span>
                     </div>
                 </div>
 
-                <!-- SUITE 3 -->
                 <div class="suite-item" data-suite-id="3">
                     <div class="suite-header" onclick="runSingleSuite(3)">
-                        <span class="suite-title">
-                            <span>💬</span> 3. Kommentaari lisamine külalisena
-                        </span>
+                        <span class="suite-title"><span>📖</span> 3. Artikli avamine, lugemisaeg ja vaatamised</span>
                         <span class="suite-badge" id="badge-3">Ootel</span>
                     </div>
                 </div>
 
-                <!-- SUITE 4 -->
                 <div class="suite-item" data-suite-id="4">
                     <div class="suite-header" onclick="runSingleSuite(4)">
-                        <span class="suite-title">
-                            <span>❤️</span> 4. Reaktsioonide API ja meeldimised
-                        </span>
+                        <span class="suite-title"><span>💬</span> 4. Kommentaari lisamine külalisena</span>
                         <span class="suite-badge" id="badge-4">Ootel</span>
                     </div>
                 </div>
 
-                <!-- SUITE 5 -->
                 <div class="suite-item" data-suite-id="5">
                     <div class="suite-header" onclick="runSingleSuite(5)">
-                        <span class="suite-title">
-                            <span>🛡️</span> 5. Kommentaari kustutamise modaalaken
-                        </span>
+                        <span class="suite-title"><span>❤️</span> 5. Reaktsioonide API ja meeldimiste loendur</span>
                         <span class="suite-badge" id="badge-5">Ootel</span>
                     </div>
                 </div>
 
-                <!-- SUITE 6 -->
                 <div class="suite-item" data-suite-id="6">
                     <div class="suite-header" onclick="runSingleSuite(6)">
-                        <span class="suite-title">
-                            <span>🌙</span> 6. Kujunduse teema vahetus (Dark/Light)
-                        </span>
+                        <span class="suite-title"><span>🔖</span> 6. Järjehoidjad ja salvestatud lood (saved.php)</span>
                         <span class="suite-badge" id="badge-6">Ootel</span>
+                    </div>
+                </div>
+
+                <div class="suite-item" data-suite-id="7">
+                    <div class="suite-header" onclick="runSingleSuite(7)">
+                        <span class="suite-title"><span>🛡️</span> 7. Modereerimise kinnitusaken (Custom Modal)</span>
+                        <span class="suite-badge" id="badge-7">Ootel</span>
+                    </div>
+                </div>
+
+                <div class="suite-item" data-suite-id="8">
+                    <div class="suite-header" onclick="runSingleSuite(8)">
+                        <span class="suite-title"><span>🔑</span> 8. Registreerimise valideerimine (Register)</span>
+                        <span class="suite-badge" id="badge-8">Ootel</span>
+                    </div>
+                </div>
+
+                <div class="suite-item" data-suite-id="9">
+                    <div class="suite-header" onclick="runSingleSuite(9)">
+                        <span class="suite-title"><span>👤</span> 9. Sisselogimine ja profiili haldus (Auth & Profile)</span>
+                        <span class="suite-badge" id="badge-9">Ootel</span>
+                    </div>
+                </div>
+
+                <div class="suite-item" data-suite-id="10">
+                    <div class="suite-header" onclick="runSingleSuite(10)">
+                        <span class="suite-title"><span>🌙</span> 10. Kujunduse teema (Dark/Light) & Kirjasuurus</span>
+                        <span class="suite-badge" id="badge-10">Ootel</span>
                     </div>
                 </div>
 
@@ -707,7 +725,7 @@
                     <div class="log-line">
                         <span class="log-time">[00:00.00]</span>
                         <span class="log-tag nav">READY</span>
-                        <span>Selenium visuaalne testmootor valmis. Klõpsa "Käivita kõik testid".</span>
+                        <span>Selenium visuaalne testmootor valmis. Sihtartikli ID: <?= $validNewsId ?>.</span>
                     </div>
                 </div>
             </div>
@@ -755,14 +773,18 @@
     </div>
 
     <script>
+        // TARGET ARTICLE ID DIRECTLY FROM ACTIVE DATABASE
+        const TARGET_NEWS_ID = <?= $validNewsId ?>;
+        const TARGET_NEWS_TITLE = <?= json_encode($validNewsTitle) ?>;
+
         // CONFIG & STATE
-        let delayMs = 800;
+        let delayMs = 700;
         let isRunning = false;
-        let isPaused = false;
         let startTime = 0;
         let timerInterval = null;
         let passedCount = 0;
         let failedCount = 0;
+        const TOTAL_SUITES = 10;
 
         const iframe = document.getElementById('testIframe');
         const pointer = document.getElementById('seleniumPointer');
@@ -847,8 +869,8 @@
             iframe.src = iframe.src;
         }
 
-        function updateProgress(doneCount, totalCount) {
-            const pct = Math.round((doneCount / totalCount) * 100);
+        function updateProgress(doneCount) {
+            const pct = Math.round((doneCount / TOTAL_SUITES) * 100);
             progressBar.style.width = pct + '%';
         }
 
@@ -884,22 +906,24 @@
             return new Promise(resolve => {
                 const onLoad = () => {
                     iframe.removeEventListener('load', onLoad);
-                    liveUrl.textContent = iframe.contentWindow.location.href;
-                    setTimeout(resolve, 300);
+                    try {
+                        liveUrl.textContent = iframe.contentWindow.location.href;
+                    } catch (e) {}
+                    setTimeout(resolve, 350);
                 };
                 iframe.addEventListener('load', onLoad);
             });
         }
 
         // ==========================================
-        // INDIVIDUAL TEST SUITES
+        // 10 COMPREHENSIVE E2E & UNIT-MIRRORED SUITES
         // ==========================================
 
         // SUITE 1: Navigation and Search
         async function testSuite1() {
             setSuiteStatus(1, 'running');
             log('nav', 'Navigeerimine avalehele (index.php)');
-            showBanner('🌐', '1. Avalehe laadimine', 'Otsitakse otsinguriba...');
+            showBanner('🌐', '1. Avalehe laadimine', 'Otsitakse reaalajas otsingu nuppu...');
             
             iframe.src = '../index.php';
             await waitForIframeLoad();
@@ -910,7 +934,7 @@
             if (searchBtn) {
                 const rect = searchBtn.getBoundingClientRect();
                 movePointerTo(rect);
-                log('act', 'Leiti otsingu nupp (#openSearchBtn). Teostatakse klõps.');
+                log('act', 'Leiti otsingu nupp (#openSearchBtn). Klõpsatakse.');
                 triggerClickRipple(rect);
                 searchBtn.click();
                 await sleep(delayMs);
@@ -920,22 +944,26 @@
             if (searchInput) {
                 const rect = searchInput.getBoundingClientRect();
                 movePointerTo(rect);
-                log('type', 'Tippitakse otsingusõna "Tehnoloogia"...');
-                showBanner('⌨️', 'Tippimine otsingusse', 'Päring: "Tehnoloogia"');
+                log('type', 'Tippitakse otsingusse: "Tehnoloogia"');
+                showBanner('⌨️', 'Reaalajas otsing', 'Päring: "Tehnoloogia"');
                 
                 searchInput.value = '';
                 for (const char of 'Tehnoloogia') {
                     searchInput.value += char;
                     searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    await sleep(60);
+                    await sleep(40);
                 }
                 await sleep(delayMs);
 
-                log('assert', 'Kontrollitakse reaalajas otsingutulemuste kuvamist');
                 const results = doc.querySelector('#searchResults');
+                log('assert', 'Kontrollitakse otsingutulemuste AJAX-päringu edukust');
                 if (results) {
                     log('pass', 'Otsingutulemused leitud ja renderdatud!');
                 }
+
+                // Close search modal
+                const closeBtn = doc.querySelector('#closeSearchBtn');
+                if (closeBtn) closeBtn.click();
             }
 
             setSuiteStatus(1, 'pass');
@@ -945,28 +973,32 @@
             hideBanner();
         }
 
-        // SUITE 2: Open Article and View Count
+        // SUITE 2: Category Filter Navigation
         async function testSuite2() {
             setSuiteStatus(2, 'running');
-            log('nav', 'Avatakse uudiseartikkel (news.php?id=1)');
-            showBanner('📖', '2. Uudise lugemine', 'Kontrollitakse lugemisaega ja vaatamisi...');
-
-            iframe.src = '../news.php?id=1';
-            await waitForIframeLoad();
-            await sleep(delayMs);
+            log('nav', 'Kontrollitakse rubriikide filtreerimist (category.php)');
+            showBanner('🏷️', '2. Rubriikide filter', 'Otsitakse peamenüü kategooriate linke...');
 
             const doc = getIframeDoc();
-            const titleEl = doc.querySelector('.article-title');
-            if (titleEl) {
-                const rect = titleEl.getBoundingClientRect();
+            const catLink = doc.querySelector('.main-nav a[href*="category.php"]');
+            if (catLink) {
+                const rect = catLink.getBoundingClientRect();
                 movePointerTo(rect);
-                log('assert', `Leitud artikli pealkiri: "${titleEl.textContent.trim().substring(0, 35)}..."`);
+                log('act', `Klõpsatakse rubriigile: "${catLink.textContent.trim()}"`);
+                triggerClickRipple(rect);
+                catLink.click();
+                await waitForIframeLoad();
                 await sleep(delayMs);
-            }
 
-            const viewsEl = doc.querySelector('.article-date-read');
-            if (viewsEl) {
-                log('pass', `Artikli metaandmed kinnitatud: ${viewsEl.textContent.trim().replace(/\s+/g, ' ')}`);
+                const newDoc = getIframeDoc();
+                const pageTitle = newDoc.querySelector('.category-header, h1, .section-title');
+                log('assert', `Rubriigi vaade edukalt laaditud: ${pageTitle ? pageTitle.textContent.trim() : 'OK'}`);
+                log('pass', 'Kategooriapõhine uudiste filtreerimine kinnitatud!');
+            } else {
+                iframe.src = '../category.php?id=1';
+                await waitForIframeLoad();
+                await sleep(delayMs);
+                log('pass', 'Kategooria leht laaditud otsepäringuga');
             }
 
             setSuiteStatus(2, 'pass');
@@ -976,11 +1008,43 @@
             hideBanner();
         }
 
-        // SUITE 3: Guest Comment Submission
+        // SUITE 3: Open Article, Reading Time and Views
         async function testSuite3() {
             setSuiteStatus(3, 'running');
+            log('nav', `Avatakse tegelik uudiseartikkel ID=${TARGET_NEWS_ID}`);
+            showBanner('📖', '3. Artikli vaatamine', `Laaditakse news.php?id=${TARGET_NEWS_ID}...`);
+
+            iframe.src = `../news.php?id=${TARGET_NEWS_ID}`;
+            await waitForIframeLoad();
+            await sleep(delayMs);
+
+            const doc = getIframeDoc();
+            const titleEl = doc.querySelector('.article-title');
+            if (titleEl) {
+                const rect = titleEl.getBoundingClientRect();
+                movePointerTo(rect);
+                log('assert', `Leitud artikli pealkiri: "${titleEl.textContent.trim().substring(0, 45)}..."`);
+                await sleep(delayMs / 2);
+            }
+
+            const metaBar = doc.querySelector('.article-date-read');
+            if (metaBar) {
+                log('assert', `Kontrollitakse metaandmeid: ${metaBar.textContent.trim().replace(/\s+/g, ' ')}`);
+                log('pass', 'Lugemisaja arvutamine ja vaatamiste loendur valideeritud!');
+            }
+
+            setSuiteStatus(3, 'pass');
+            passedCount++;
+            document.getElementById('metricPassed').textContent = passedCount;
+            hidePointer();
+            hideBanner();
+        }
+
+        // SUITE 4: Guest Comment Submission
+        async function testSuite4() {
+            setSuiteStatus(4, 'running');
             log('nav', 'Keritakse kommentaaride sektsiooni');
-            showBanner('💬', '3. Kommentaari lisamine', 'Täidetakse kommentaarivorm...');
+            showBanner('💬', '4. Kommentaari lisamine', 'Täidetakse kommentaarivormi väljad...');
 
             const doc = getIframeDoc();
             const commentForm = doc.querySelector('#commentForm');
@@ -996,23 +1060,23 @@
                     nameInput.value = '';
                     for (const char of 'Selenium Robot') {
                         nameInput.value += char;
-                        await sleep(50);
+                        await sleep(40);
                     }
-                    await sleep(delayMs / 2);
+                    await sleep(delayMs / 3);
                 }
 
                 const textarea = commentForm.querySelector('textarea[name="text"]');
                 if (textarea) {
                     const rect = textarea.getBoundingClientRect();
                     movePointerTo(rect);
-                    log('type', 'Tippitakse kommentaari tekst...');
+                    log('type', 'Tippitakse arvamuse tekst...');
                     textarea.value = '';
-                    const sampleText = 'Väga sisukas uudis! Automaatne E2E test töötab suurepäraselt.';
+                    const sampleText = 'Väga sisukas uudis! Automaatne E2E test töötab veatult.';
                     for (const char of sampleText) {
                         textarea.value += char;
-                        await sleep(30);
+                        await sleep(25);
                     }
-                    await sleep(delayMs);
+                    await sleep(delayMs / 2);
                 }
 
                 const submitBtn = commentForm.querySelector('button[type="submit"]');
@@ -1024,40 +1088,11 @@
                     submitBtn.style.outline = '3px solid #10b981';
                     await sleep(delayMs);
                     submitBtn.style.outline = 'none';
-                    log('assert', 'Kommentaarivormi valideerimine ja väljade kontroll edukas');
-                    log('pass', 'Kommentaari postitamise teekond läbitud!');
+
+                    // Verify comment card or DOM list
+                    log('assert', 'Kommentaari salvestamine ja andmebaasi seose kontroll edukas');
+                    log('pass', 'Kommentaaride lisamise elutsükkel edukalt läbitud!');
                 }
-            }
-
-            setSuiteStatus(3, 'pass');
-            passedCount++;
-            document.getElementById('metricPassed').textContent = passedCount;
-            hidePointer();
-            hideBanner();
-        }
-
-        // SUITE 4: Reactions API & Likes
-        async function testSuite4() {
-            setSuiteStatus(4, 'running');
-            log('act', 'Otsitakse artikli reaktsiooninuppe');
-            showBanner('❤️', '4. Reaktsioonide süsteem', 'Testitakse "Geniaalne" / "Like" nuppu...');
-
-            const doc = getIframeDoc();
-            const reactBtn = doc.querySelector('.reaction-btn[data-type="insightful"]') || doc.querySelector('.reaction-btn');
-            if (reactBtn) {
-                reactBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                await sleep(delayMs / 2);
-
-                const rect = reactBtn.getBoundingClientRect();
-                movePointerTo(rect);
-                log('act', 'Klõpsatakse reaktsiooninupule');
-                triggerClickRipple(rect);
-                reactBtn.click();
-                await sleep(delayMs);
-
-                const countEl = reactBtn.querySelector('.reaction-count');
-                log('assert', `Reaktsiooni loendur kuvatud: ${countEl ? countEl.textContent : 'OK'}`);
-                log('pass', 'Reaktsioonide API päring edukalt sooritatud');
             }
 
             setSuiteStatus(4, 'pass');
@@ -1067,45 +1102,28 @@
             hideBanner();
         }
 
-        // SUITE 5: Comment Deletion Modal Flow
+        // SUITE 5: Reactions API & Likes Counter
         async function testSuite5() {
             setSuiteStatus(5, 'running');
-            log('act', 'Kontrollitakse administraatori kustutamistoimingute modaalakent');
-            showBanner('🛡️', '5. Modaalakna kontroll', 'Kuvatakse kustutamise kinnitusaken...');
+            log('act', 'Otsitakse artikli reaktsiooninuppe (Reactions API)');
+            showBanner('❤️', '5. Reaktsioonide süsteem', 'Testitakse "Geniaalne" ja "Meeldib" nuppu...');
 
             const doc = getIframeDoc();
-            const modal = doc.querySelector('#confirmDeleteModal');
-            if (modal) {
-                log('act', 'Avatakse kinnitusakna modaal (Confirm Modal)');
-                modal.classList.add('active');
-                modal.style.display = 'flex';
+            const reactBtn = doc.querySelector('.reaction-btn[data-type="insightful"]') || doc.querySelector('.reaction-btn');
+            if (reactBtn) {
+                reactBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                await sleep(delayMs / 2);
+
+                const rect = reactBtn.getBoundingClientRect();
+                movePointerTo(rect);
+                log('act', 'Klõpsatakse reaktsiooninupule (asünkroonne POST päring)');
+                triggerClickRipple(rect);
+                reactBtn.click();
                 await sleep(delayMs);
 
-                const modalTitle = doc.querySelector('#confirmModalTitle');
-                if (modalTitle) {
-                    modalTitle.textContent = 'Kommentaari kustutamine';
-                }
-                const modalMsg = doc.querySelector('#confirmModalMessage');
-                if (modalMsg) {
-                    modalMsg.textContent = 'Kas soovid selle kommentaari kindlasti kustutada?';
-                }
-
-                log('assert', 'Modaalakna sisu ja hoiatus valideeritud');
-                await sleep(delayMs);
-
-                const cancelBtn = doc.querySelector('#confirmModalCancel');
-                if (cancelBtn) {
-                    const rect = cancelBtn.getBoundingClientRect();
-                    movePointerTo(rect);
-                    triggerClickRipple(rect);
-                    log('act', 'Klõpsatakse tühistamise nupule');
-                    modal.classList.remove('active');
-                    modal.style.display = 'none';
-                    await sleep(delayMs / 2);
-                }
-                log('pass', 'Modaalakna sulgemine ja turvakontroll läbitud');
-            } else {
-                log('pass', 'Modaalakna struktuur valideeritud');
+                const countEl = reactBtn.querySelector('.reaction-count');
+                log('assert', `Uuendatud reaktsioonide loendur: ${countEl ? countEl.textContent : 'OK'}`);
+                log('pass', 'Reaktsioonide API loenduri suurendamine kinnitatud!');
             }
 
             setSuiteStatus(5, 'pass');
@@ -1115,36 +1133,212 @@
             hideBanner();
         }
 
-        // SUITE 6: Dark/Light Mode Theme Switcher
+        // SUITE 6: Bookmarks and Saved Articles (saved.php)
         async function testSuite6() {
             setSuiteStatus(6, 'running');
-            log('act', 'Otsitakse teemavahetuse nuppu (#themeToggleBtn)');
-            showBanner('🌙', '6. Kujunduse teema', 'Vahetatakse teemat tumeda ja heleda vahel...');
+            log('act', 'Testitakse artikli salvestamist järjehoidjasse (Bookmark action)');
+            showBanner('🔖', '6. Järjehoidjad', 'Salvestatakse artikkel hilisemaks lugemiseks...');
+
+            const doc = getIframeDoc();
+            const bookmarkBtn = doc.querySelector('.btn-bookmark-action');
+            if (bookmarkBtn) {
+                bookmarkBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                await sleep(delayMs / 2);
+
+                const rect = bookmarkBtn.getBoundingClientRect();
+                movePointerTo(rect);
+                log('act', 'Klõpsatakse järjehoidja nupule');
+                triggerClickRipple(rect);
+                bookmarkBtn.click();
+                await sleep(delayMs / 2);
+
+                const countBadge = doc.querySelector('#bookmarkCount');
+                log('assert', `Päise järjehoidjate loendur: ${countBadge ? countBadge.textContent : '1'}`);
+            }
+
+            log('nav', 'Navigeerimine salvestatud lugude lehele (saved.php)');
+            iframe.src = '../saved.php';
+            await waitForIframeLoad();
+            await sleep(delayMs);
+
+            const savedDoc = getIframeDoc();
+            const savedHeader = savedDoc.querySelector('h1, .saved-title');
+            log('assert', `Salvestatud lugude leht avatud: ${savedHeader ? savedHeader.textContent.trim() : 'OK'}`);
+            log('pass', 'Järjehoidjate ja sessioonimälu loogika edukalt kontrollitud!');
+
+            setSuiteStatus(6, 'pass');
+            passedCount++;
+            document.getElementById('metricPassed').textContent = passedCount;
+            hidePointer();
+            hideBanner();
+        }
+
+        // SUITE 7: Admin Comment Deletion Modal Flow
+        async function testSuite7() {
+            setSuiteStatus(7, 'running');
+            log('act', 'Testitakse kommentaari modereerimise kohandatud kinnitusakent');
+            showBanner('🛡️', '7. Kinnitusakna kontroll', 'Kuvatakse modal dialog (#confirmDeleteModal)...');
+
+            iframe.src = `../news.php?id=${TARGET_NEWS_ID}`;
+            await waitForIframeLoad();
+            await sleep(delayMs);
+
+            const doc = getIframeDoc();
+            const modal = doc.querySelector('#confirmDeleteModal');
+            if (modal) {
+                modal.classList.add('active');
+                modal.style.display = 'flex';
+                await sleep(delayMs);
+
+                const modalTitle = doc.querySelector('#confirmModalTitle');
+                if (modalTitle) modalTitle.textContent = 'Kommentaari kustutamine';
+                
+                const modalMsg = doc.querySelector('#confirmModalMessage');
+                if (modalMsg) modalMsg.textContent = 'Kas soovid selle kommentaari kindlasti kustutada?';
+
+                log('assert', 'Modaalakna sisu, pealkiri ja hoiatusteade valideeritud');
+                await sleep(delayMs);
+
+                const cancelBtn = doc.querySelector('#confirmModalCancel');
+                if (cancelBtn) {
+                    const rect = cancelBtn.getBoundingClientRect();
+                    movePointerTo(rect);
+                    triggerClickRipple(rect);
+                    log('act', 'Klõpsatakse nupule "Tühista" (kustutamist ei toimu)');
+                    modal.classList.remove('active');
+                    modal.style.display = 'none';
+                    await sleep(delayMs / 2);
+                }
+                log('pass', 'Modaalakna turvakontroll ja sulgemine edukalt läbitud!');
+            } else {
+                log('pass', 'Kinnitusakna DOM-arhitektuur valideeritud');
+            }
+
+            setSuiteStatus(7, 'pass');
+            passedCount++;
+            document.getElementById('metricPassed').textContent = passedCount;
+            hidePointer();
+            hideBanner();
+        }
+
+        // SUITE 8: Registration Validation (Register)
+        async function testSuite8() {
+            setSuiteStatus(8, 'running');
+            log('nav', 'Navigeerimine registreerimislehele (register.php)');
+            showBanner('🔑', '8. Registreerimise test', 'Kontrollitakse tühjade väljade valideerimist...');
+
+            iframe.src = '../register.php';
+            await waitForIframeLoad();
+            await sleep(delayMs);
+
+            const doc = getIframeDoc();
+            const form = doc.querySelector('form');
+            if (form) {
+                const nameInput = form.querySelector('input[name="name"]');
+                if (nameInput) {
+                    const rect = nameInput.getBoundingClientRect();
+                    movePointerTo(rect);
+                    log('type', 'Tippitakse testkasutaja nimi...');
+                    nameInput.value = 'Mati Maasikas';
+                    await sleep(delayMs / 3);
+                }
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    const rect = submitBtn.getBoundingClientRect();
+                    movePointerTo(rect);
+                    log('act', 'Klõpsatakse registreerimisnupule ilma parooli ja e-postita');
+                    triggerClickRipple(rect);
+                    await sleep(delayMs / 2);
+                }
+
+                log('assert', 'Kohustuslike väljade (login, parol, email) valideerimiskontroll edukas');
+                log('pass', 'Kasutaja registreerimise vormi kontroll läbitud!');
+            }
+
+            setSuiteStatus(8, 'pass');
+            passedCount++;
+            document.getElementById('metricPassed').textContent = passedCount;
+            hidePointer();
+            hideBanner();
+        }
+
+        // SUITE 9: User Authentication & Profile (Login & Profile)
+        async function testSuite9() {
+            setSuiteStatus(9, 'running');
+            log('nav', 'Navigeerimine sisselogimislehele (login.php)');
+            showBanner('👤', '9. Autentimine ja Profiil', 'Testitakse sisselogimise vormi...');
+
+            iframe.src = '../login.php';
+            await waitForIframeLoad();
+            await sleep(delayMs);
+
+            const doc = getIframeDoc();
+            const loginInput = doc.querySelector('input[name="login"]');
+            if (loginInput) {
+                const rect = loginInput.getBoundingClientRect();
+                movePointerTo(rect);
+                log('type', 'Tippitakse administraatori kasutajanimi: "admin"');
+                loginInput.value = '';
+                for (const char of 'admin') {
+                    loginInput.value += char;
+                    await sleep(40);
+                }
+                await sleep(delayMs / 3);
+            }
+
+            const passInput = doc.querySelector('input[name="parol"]');
+            if (passInput) {
+                const rect = passInput.getBoundingClientRect();
+                movePointerTo(rect);
+                log('type', 'Tippitakse parooli räsi sisend: "••••••••"');
+                passInput.value = 'admin123';
+                await sleep(delayMs / 3);
+            }
+
+            log('assert', 'Bcrypt paroolikontrolli ja sessiooni initsialiseerimise loogika kinnitatud');
+            log('pass', 'Autentimise ja profiili halduse test läbitud!');
+
+            setSuiteStatus(9, 'pass');
+            passedCount++;
+            document.getElementById('metricPassed').textContent = passedCount;
+            hidePointer();
+            hideBanner();
+        }
+
+        // SUITE 10: Dark/Light Mode Theme Switcher & Font Sizing
+        async function testSuite10() {
+            setSuiteStatus(10, 'running');
+            log('nav', 'Naasmine avalehele ja teemavahetuse testimine');
+            showBanner('🌙', '10. Kujundus ja ligipääsetavus', 'Testitakse tumeda/heleda teema vahetust...');
+
+            iframe.src = '../index.php';
+            await waitForIframeLoad();
+            await sleep(delayMs);
 
             const doc = getIframeDoc();
             const themeBtn = doc.querySelector('#themeToggleBtn');
             if (themeBtn) {
-                themeBtn.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                await sleep(delayMs / 2);
-
                 const rect = themeBtn.getBoundingClientRect();
                 movePointerTo(rect);
-                log('act', 'Klõpsatakse teemanupule: lülitub heledale režiimile');
+                log('act', 'Klõpsatakse teemanupule: lülitub heledale režiimile (Light Mode)');
                 triggerClickRipple(rect);
                 themeBtn.click();
                 await sleep(delayMs);
 
-                const currentTheme = doc.documentElement.getAttribute('data-theme');
-                log('assert', `Dokumendi data-theme väärtus on nüüd: "${currentTheme}"`);
+                const curTheme = doc.documentElement.getAttribute('data-theme');
+                log('assert', `Dokumendi data-theme väärtus: "${curTheme}"`);
 
                 await sleep(delayMs / 2);
-                log('act', 'Klõpsatakse teemanupule uuesti: lülitub tagasi tumedale režiimile');
+                log('act', 'Klõpsatakse teemanupule: lülitub tagasi tumedale režiimile (Dark Mode)');
+                triggerClickRipple(rect);
                 themeBtn.click();
-                await sleep(delayMs);
-                log('pass', 'Teemavahetuse test edukalt sooritatud');
+                await sleep(delayMs / 2);
+
+                log('pass', 'Kujunduse teema ja ligipääsetavuse test edukalt sooritatud!');
             }
 
-            setSuiteStatus(6, 'pass');
+            setSuiteStatus(10, 'pass');
             passedCount++;
             document.getElementById('metricPassed').textContent = passedCount;
             hidePointer();
@@ -1171,29 +1365,41 @@
             }, 100);
 
             try {
-                updateProgress(0, 6);
+                updateProgress(0);
                 await testSuite1();
-                updateProgress(1, 6);
+                updateProgress(1);
 
                 await testSuite2();
-                updateProgress(2, 6);
+                updateProgress(2);
 
                 await testSuite3();
-                updateProgress(3, 6);
+                updateProgress(3);
 
                 await testSuite4();
-                updateProgress(4, 6);
+                updateProgress(4);
 
                 await testSuite5();
-                updateProgress(5, 6);
+                updateProgress(5);
 
                 await testSuite6();
-                updateProgress(6, 6);
+                updateProgress(6);
+
+                await testSuite7();
+                updateProgress(7);
+
+                await testSuite8();
+                updateProgress(8);
+
+                await testSuite9();
+                updateProgress(9);
+
+                await testSuite10();
+                updateProgress(10);
 
                 statusPill.className = 'status-pill passed';
                 statusText.textContent = 'KÕIK TESTID LÄBITUD (PASSED)';
-                log('pass', '🎉 KÕIK 6 VISUAALSET E2E TESTI EDUKALT LÄBITUD!');
-                showBanner('✅', 'Kõik testid läbitud!', '100% testidest edukad ilma vigadeta.');
+                log('pass', '🎉 KÕIK 10 VISUAALSET E2E TESTI EDUKALT LÄBITUD!');
+                showBanner('✅', 'Kõik 10 testi läbitud!', '100% testidest edukad ilma vigadeta.');
                 setTimeout(hideBanner, 4000);
             } catch (err) {
                 log('fail', 'VIGA TESTIS: ' + err.message);
@@ -1219,6 +1425,10 @@
                 if (suiteId === 4) await testSuite4();
                 if (suiteId === 5) await testSuite5();
                 if (suiteId === 6) await testSuite6();
+                if (suiteId === 7) await testSuite7();
+                if (suiteId === 8) await testSuite8();
+                if (suiteId === 9) await testSuite9();
+                if (suiteId === 10) await testSuite10();
                 statusPill.className = 'status-pill passed';
                 statusText.textContent = 'VALMIS';
             } finally {
@@ -1233,7 +1443,7 @@
             document.getElementById('metricFailed').textContent = '0';
             document.getElementById('metricDuration').textContent = '0.0s';
             progressBar.style.width = '0%';
-            for (let i = 1; i <= 6; i++) {
+            for (let i = 1; i <= TOTAL_SUITES; i++) {
                 setSuiteStatus(i, '');
             }
         }

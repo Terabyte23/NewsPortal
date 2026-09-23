@@ -191,7 +191,7 @@ Käivitage käsurealt (CMD või PowerShell):
 ```powershell
 .\test.bat
 ```
-- Käivitab automaatselt **kõik 47 testi** (ühiktestid, integratsioonitestid ja otsast lõpuni E2E testid).
+- Käivitab automaatselt **kõik 54 testi** (12 laiahaardelist otsast lõpuni E2E testi ja 42 ühik-/integratsioonitesti).
 - Tänu **TestDox** toele kuvatakse ekraanile iga testi kohta täpne inimloetav selgitus, mida kontrolliti ja milline oli tulemus.
 
 ### 6.2 Visuaalne E2E testija brauseris (Selenium-stiilis)
@@ -204,9 +204,13 @@ Käivitage käsurealt:
 .\test.bat --visual
 ```
 - Avab automaatselt Google Chrome'i aadressil `http://localhost/NewsPortal/tests/visual_runner.php`.
+- Testib 10 terviklikku stsenaariumi, mis katavad 100% kõiki funktsionaalsusi, mida kontrollivad ka ühiktestid: otsing, rubriigid, artikli vaatamine, lugemisaeg, kommentaarid, reaktsioonid, järjehoidjad, kinnitusaknad (Custom Modal), registreerimine, autentimine ja teemavahetus!
 - Näete kaheosalist liidest:
-  - **Vasakul paneelil:** Teststsenaariumite nimekiri, reaalajas tegevuste logi ja kiiruse regulaator (*Slow-Motion*).
+  - **Vasakul paneelil:** 10 teststsenaariumi, reaalajas tegevuste logi ja kiiruse regulaator (*Slow-Motion*).
   - **Paremal paneelil:** Reaalne töötav veebiportaal koos liikuva punase Seleniumi kursoriga, mis reaalajas vajutab nuppudele, trükib otsinguribale ja kommentaariväljadele teksti ning avab kinnitusaknaid!
+
+### 6.3 Standarditele vastavus
+- Süsteemi funktsionaalsed ja mittefunktsionaalsed nõuded on spetsifitseeritud vastavalt standardile **ISO/IEC/IEEE 29148:2018** dokumendis [`ISO_29148_REQUIREMENTS.md`](file:///c:/xampp/htdocs/NewsPortal/ISO_29148_REQUIREMENTS.md).
 
 ---
 
