@@ -1,6 +1,9 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @testdox Autentimise ja sisselogimise testid (User Authentication & Login)
+ */
 class LoginTest extends TestCase {
 
     protected function setUp(): void {
@@ -12,6 +15,9 @@ class LoginTest extends TestCase {
         }
     }
 
+    /**
+     * @testdox Tühjade sisselogimisväljade korral kuvatakse veateade (Empty credentials return validation error)
+     */
     public function testEmptyCredentialsReturnError() {
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_POST['login'] = '';
@@ -28,6 +34,9 @@ class LoginTest extends TestCase {
         $this->assertEquals('Palun täida kõik väljad!', $error);
     }
 
+    /**
+     * @testdox Edukas administraatori sisselogimine salvestab sessiooni kasutaja andmed ja rolli (Successful login sets session)
+     */
     public function testSuccessfulAdminLoginSetsSession() {
         $user = [
             'id' => 1,

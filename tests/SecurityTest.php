@@ -3,6 +3,9 @@ use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../db.php';
 
+/**
+ * @testdox Turvalisuse ja andmekaitse testid (Security & OWASP Hardening)
+ */
 class SecurityTest extends TestCase {
 
     protected function setUp(): void {
@@ -12,6 +15,9 @@ class SecurityTest extends TestCase {
         }
     }
 
+    /**
+     * @testdox CSRF-kaitsetoa genereerimine (64 tähemärki) ja valideerimise kontroll (CSRF token generation & validation)
+     */
     public function testCsrfTokenGenerationAndValidation() {
         $token = csrf_token();
         $this->assertNotEmpty($token);
@@ -26,6 +32,9 @@ class SecurityTest extends TestCase {
         $this->assertFalse(verify_csrf_token(null));
     }
 
+    /**
+     * @testdox Paroolide turvaline räsimine Bcrypt algoritmiga ja verifitseerimine (Password hashing with Bcrypt)
+     */
     public function testPasswordHashingBcrypt() {
         $plain = 'Salasona2026!';
         $hash = password_hash($plain, PASSWORD_DEFAULT);
@@ -35,6 +44,9 @@ class SecurityTest extends TestCase {
         $this->assertFalse(password_verify('ValeParool', $hash));
     }
 
+    /**
+     * @testdox Kasutajarollide ja ligipääsuõiguste kontroll (RBAC permissions: admin, editor, user)
+     */
     public function testRoleAccessPermissions() {
         $admin = ['status' => 'admin'];
         $editor = ['status' => 'editor'];
@@ -49,6 +61,9 @@ class SecurityTest extends TestCase {
         $this->assertFalse(is_editor_or_admin($reader));
     }
 
+    /**
+     * @testdox XSS-rünnakute tõkestamine htmlspecialchars funktsiooniga (XSS prevention via HTML escaping)
+     */
     public function testHtmlSpecialCharsEscaping() {
         $malicious = "<script>alert('XSS')</script>";
         $escaped = htmlspecialchars($malicious, ENT_QUOTES, 'UTF-8');

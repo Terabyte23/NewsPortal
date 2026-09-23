@@ -1,8 +1,14 @@
 <?php
 require_once __DIR__ . '/DatabaseTestCase.php';
 
+/**
+ * @testdox Kasutajate haldamise ja rollide muutmise testid (User Management & Role Assignment)
+ */
 class UserManagementTest extends DatabaseTestCase {
 
+    /**
+     * @testdox Kasutaja loomine andmebaasi ja unikaalse kasutajanime (login) duplikaadi kontroll
+     */
     public function testUserRegistrationAndDuplicateCheck() {
         $login = "testuser_" . time();
         $email = "test@newsportal.ee";
@@ -17,6 +23,9 @@ class UserManagementTest extends DatabaseTestCase {
         $this->assertEquals(1, $check->num_rows);
     }
 
+    /**
+     * @testdox Kasutaja rolli muutmine administraatori poolt (nt kasutaja ülendamine toimetajaks: user -> editor)
+     */
     public function testUpdateUserRole() {
         self::$db->query("INSERT INTO users (name, login, status) VALUES ('Promote Me', 'promuser', 'user')");
         $userId = self::$db->insert_id;

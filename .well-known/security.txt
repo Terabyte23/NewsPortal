@@ -1,0 +1,8 @@
+# NewsPortal Security Vulnerability Disclosure Policy (RFC 9116 / ISO/IEC 29147:2018)
+Contact: mailto:security@newsportal.local
+Contact: https://github.com/Terabyte23/NewsPortal/issues
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: et, en, ru
+Policy: http://localhost/NewsPortal/ISO_29147_SECURITY.md
+Acknowledgments: http://localhost/NewsPortal/ISO_29147_SECURITY.md#tunnustused-hall-of-fame
+Canonical: http://localhost/NewsPortal/.well-known/security.txt

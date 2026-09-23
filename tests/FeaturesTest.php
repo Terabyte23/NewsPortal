@@ -1,8 +1,14 @@
 <?php
 require_once __DIR__ . '/DatabaseTestCase.php';
 
+/**
+ * @testdox Portaali lisafunktsioonide testid (Search, Comments & Saved Articles)
+ */
 class FeaturesTest extends DatabaseTestCase {
 
+    /**
+     * @testdox Uudiste otsing märksõna järgi LIKE päringuga (Search articles by keyword)
+     */
     public function testSearchArticlesByKeyword() {
         $uniqueKeyword = "Unikaalne" . rand(1000, 9999);
         self::$db->query("INSERT INTO news (title) VALUES ('Uudis $uniqueKeyword')");
@@ -17,6 +23,9 @@ class FeaturesTest extends DatabaseTestCase {
         $this->assertStringContainsString($uniqueKeyword, $row['title']);
     }
 
+    /**
+     * @testdox Kommentaari lisamine uudisele ja pärimine andmebaasist (Add and fetch comments)
+     */
     public function testAddAndFetchComments() {
         self::$db->query("INSERT INTO news (title) VALUES ('Article for comment')");
         $newsId = self::$db->insert_id;
@@ -58,6 +67,9 @@ class FeaturesTest extends DatabaseTestCase {
         $this->assertEquals(1, $res->num_rows);
     }
 
+    /**
+     * @testdox Lemmikartiklite / salvestatud uudiste lisamine ja eemaldamine sessioonist (Saved articles session logic)
+     */
     public function testSavedArticlesSessionLogic() {
         if (session_status() === PHP_SESSION_NONE) @session_start();
         $_SESSION['saved_news'] = [];

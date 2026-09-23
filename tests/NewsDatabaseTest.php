@@ -1,14 +1,23 @@
 <?php
 require_once __DIR__ . '/DatabaseTestCase.php';
 
+/**
+ * @testdox Uudiste andmebaasi funktsioonide testid (News Database Operations)
+ */
 class NewsDatabaseTest extends DatabaseTestCase {
 
+    /**
+     * @testdox Vigase või aegunud sessiooni korral tagastatakse sisselogitud kasutajaks null
+     */
     public function testGetLoggedInUserReturnsNullForInvalidSession() {
         $_SESSION['user_id'] = 999999;
         $user = get_logged_in_user(self::$db);
         $this->assertNull($user);
     }
 
+    /**
+     * @testdox Uue uudiseartikli loomine ja andmebaasist pärimine (Create and fetch news article)
+     */
     public function testCreateAndFetchNewsArticle() {
         $title = "Uudis Test " . time();
         
@@ -28,6 +37,9 @@ class NewsDatabaseTest extends DatabaseTestCase {
         $this->assertEquals($title, $article['title']);
     }
 
+    /**
+     * @testdox Artikli vaatamiste ja meeldimiste (likes/views) loenduri suurendamine andmebaasis
+     */
     public function testIncrementNewsViewsAndLikes() {
         $resInsert = self::$db->query("INSERT INTO news (title) VALUES ('Test View')");
         $this->assertTrue($resInsert, "Insert failed: " . self::$db->error);
@@ -44,6 +56,9 @@ class NewsDatabaseTest extends DatabaseTestCase {
         $this->assertEquals(1, $updated['likes']);
     }
 
+    /**
+     * @testdox Uudiste filtreerimine kategooria järgi (Fetch news by category)
+     */
     public function testFetchNewsByCategory() {
         // Create test category
         $catName = 'TestCat_' . time();

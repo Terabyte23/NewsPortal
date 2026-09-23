@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/DatabaseTestCase.php';
 
+/**
+ * @testdox Kommentaaride haldus ja modereerimine (Comment Management & Moderation)
+ */
 class CommentManagementTest extends DatabaseTestCase {
 
     private $testNewsId;
@@ -14,6 +17,9 @@ class CommentManagementTest extends DatabaseTestCase {
         $this->testNewsId = self::$db->insert_id;
     }
 
+    /**
+     * @testdox Külalislugeja saab edukalt postitada kommentaari uudisele (Guest can add comment)
+     */
     public function testGuestCanAddComment() {
         $author = 'Külaline Lugeja';
         $text = 'See on külalise kommentaar.';
@@ -35,6 +41,9 @@ class CommentManagementTest extends DatabaseTestCase {
         $this->assertNull($row['user_id']);
     }
 
+    /**
+     * @testdox Registreeritud kasutaja saab lisada kommentaari oma kasutajatunnusega (Registered user can add comment)
+     */
     public function testRegisteredUserCanAddComment() {
         // Create test user
         $login = 'user_' . time() . '_' . rand(100, 999);
@@ -58,6 +67,9 @@ class CommentManagementTest extends DatabaseTestCase {
         $this->assertEquals($author, $row['author_name']);
     }
 
+    /**
+     * @testdox Administraator saab kommentaari edukalt kustutada andmebaasist (Admin can delete comment successfully)
+     */
     public function testAdminCanDeleteCommentSuccessfully() {
         // 1. Insert a comment
         $stmt = self::$db->prepare("INSERT INTO comments (news_id, text, author_name) VALUES (?, 'Kustutatav kommentaar', 'Testija')");
@@ -83,6 +95,9 @@ class CommentManagementTest extends DatabaseTestCase {
         $this->assertEquals(0, $postCheck->num_rows);
     }
 
+    /**
+     * @testdox Tavakasutajal ja külalisel puuduvad õigused kommentaaride kustutamiseks (Regular user and guest cannot delete comment)
+     */
     public function testRegularUserAndGuestCannotDeleteComment() {
         // 1. Insert a comment
         $stmt = self::$db->prepare("INSERT INTO comments (news_id, text, author_name) VALUES (?, 'Oluline arvamus', 'Lugeja')");
@@ -113,6 +128,9 @@ class CommentManagementTest extends DatabaseTestCase {
         $this->assertEquals(1, $check->num_rows);
     }
 
+    /**
+     * @testdox Kommentaari kustutamise katse olematu ID-ga käsitletakse turvaliselt (Delete comment with invalid ID handles safely)
+     */
     public function testDeleteCommentWithInvalidIdHandlesSafely() {
         $invalidId = -5;
         $stmt = self::$db->prepare("DELETE FROM comments WHERE id = ?");
@@ -123,6 +141,9 @@ class CommentManagementTest extends DatabaseTestCase {
         $this->assertEquals(0, $stmt->affected_rows);
     }
 
+    /**
+     * @testdox Uudise kustutamisel kustutatakse kaskaadselt ka kõik selle kommentaarid (Deleting news cascades to delete comments)
+     */
     public function testDeletingNewsCascadesToDeleteComments() {
         // Add 3 comments to the test article
         for ($i = 1; $i <= 3; $i++) {
@@ -147,6 +168,9 @@ class CommentManagementTest extends DatabaseTestCase {
         $this->assertEquals(0, (int)$afterCount);
     }
 
+    /**
+     * @testdox Kommentaari kustutamiseks nõutakse kehtivat CSRF-kaitsetõendit (CSRF token required for admin comment deletion)
+     */
     public function testCsrfTokenRequiredForAdminCommentDeletion() {
         if (session_status() === PHP_SESSION_NONE) {
             @session_start();
@@ -161,6 +185,9 @@ class CommentManagementTest extends DatabaseTestCase {
         $this->assertFalse(verify_csrf_token(null));
     }
 
+    /**
+     * @testdox Kommentaaride pärimine koos uudise pealkirjaga modereerimiseks (Fetch comments with news title for moderation)
+     */
     public function testFetchCommentsWithNewsTitleForAdminModeration() {
         $stmt = self::$db->prepare("INSERT INTO comments (news_id, text, author_name) VALUES (?, 'Moderatsioonitest', 'ModTestija')");
         $stmt->bind_param("i", $this->testNewsId);
@@ -179,6 +206,9 @@ class CommentManagementTest extends DatabaseTestCase {
         $this->assertEquals('Test Article for Comments', $row['news_title']);
     }
 
+    /**
+     * @testdox Administraator saab kommentaari kustutada otse artikli vaatest (Admin can delete comment directly in news post)
+     */
     public function testAdminCanDeleteCommentDirectlyInNewsPost() {
         // 1. Add comment to article
         $stmt = self::$db->prepare("INSERT INTO comments (news_id, text, author_name) VALUES (?, 'Kustutatav otse postitusest', 'Autor')");
@@ -203,4 +233,3 @@ class CommentManagementTest extends DatabaseTestCase {
         $this->assertEquals(0, $postRes->num_rows);
     }
 }
-

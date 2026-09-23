@@ -1,8 +1,14 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @testdox Kasutaja registreerimise testid (User Registration Validation)
+ */
 class RegisterTest extends TestCase {
 
+    /**
+     * @testdox Registreerimisvormi valideerimine: puuduvate kohustuslike väljade korral kuvatakse veateade
+     */
     public function testValidationFailsWithMissingFields() {
         $_POST = [
             'name' => 'Mati',

@@ -1,8 +1,14 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @testdox Kasutajaprofiili funktsionaalsuse testid (User Profile & Account Settings)
+ */
 class ProfileTest extends TestCase {
 
+    /**
+     * @testdox Sisselogimata kasutaja tuvastamine profiili kaitsmiseks (Redirect if not logged in)
+     */
     public function testRedirectIfUserNotLoggedIn() {
         $_SESSION = [];
         $currentUser = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
@@ -10,6 +16,9 @@ class ProfileTest extends TestCase {
         $this->assertNull($currentUser, 'Kasutaja ei tohi olla sisse logitud');
     }
 
+    /**
+     * @testdox Kasutaja profiiliandmete ja parooli uuendamise päringu genereerimine (Profile update query generation)
+     */
     public function testProfileUpdateQueryGeneration() {
         $currentUser = ['id' => 5];
         $name = "Uus Nimi";
