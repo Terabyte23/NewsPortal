@@ -60,7 +60,7 @@ include 'header.php';
                         <td style="max-width: 320px;"><?= nl2br(htmlspecialchars($cm['text'])) ?></td>
                         <td><?= format_time_ago($cm['date']) ?></td>
                         <td style="text-align: right;">
-                            <a href="comments.php?del=<?= $cm['id'] ?>&csrf_token=<?= csrf_token() ?>" class="action-btn-del" onclick="return confirm('Kustuta see kommentaar?');">Kustuta</a>
+                            <a href="comments.php?del=<?= $cm['id'] ?>&csrf_token=<?= csrf_token() ?>" class="action-btn-del" data-confirm-title="Kommentaari kustutamine" data-confirm-message="Kas soovid selle kommentaari kindlasti kustutada?">Kustuta</a>
                         </td>
                     </tr>
                 <?php endwhile; ?>

@@ -93,7 +93,7 @@ include 'header.php';
                                 </a>
                                 <?php if ($u['id'] != $currentUser['id']): ?>
                                     <span style="color: var(--border-color);">|</span>
-                                    <a href="users.php?del=<?= $u['id'] ?>&csrf_token=<?= csrf_token() ?>" class="action-btn-del" onclick="return confirm('Kustuta kasutaja?');">Kustuta</a>
+                                    <a href="users.php?del=<?= $u['id'] ?>&csrf_token=<?= csrf_token() ?>" class="action-btn-del" data-confirm-title="Kasutaja kustutamine" data-confirm-message="Kas soovid selle kasutaja konto kindlasti kustutada?">Kustuta</a>
                                 <?php endif; ?>
                             </div>
                         </td>

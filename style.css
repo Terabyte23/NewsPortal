@@ -1468,12 +1468,26 @@ button, input, select, textarea {
 }
 
 .comment-delete-btn {
-    background: transparent;
-    border: none;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.25);
     color: #ef4444;
     cursor: pointer;
     font-size: 0.75rem;
     font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all var(--transition);
+}
+
+.comment-delete-btn:hover {
+    background: #ef4444;
+    color: #ffffff;
+    border-color: #ef4444;
+    box-shadow: 0 2px 10px rgba(239, 68, 68, 0.35);
+    transform: translateY(-1px);
 }
 
 /* SEARCH MODAL */
@@ -1574,6 +1588,133 @@ button, input, select, textarea {
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 3px;
+}
+
+/* ==========================================================================
+   GLOBAL CONFIRMATION MODAL SYSTEM (REPLACES BROWSER TOP POPUP CONFIRM)
+   ========================================================================== */
+.np-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(4, 7, 14, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.np-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.np-modal-dialog {
+    position: relative;
+    width: 460px;
+    max-width: 92%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(239, 68, 68, 0.12);
+    padding: 28px 24px 22px 24px;
+    transform: scale(0.92) translateY(12px);
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+}
+
+.np-modal-overlay.active .np-modal-dialog {
+    transform: scale(1) translateY(0);
+}
+
+.np-modal-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.np-modal-icon-badge {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.np-modal-title-area {
+    flex-grow: 1;
+}
+
+.np-modal-title {
+    font-size: 1.1875rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    line-height: 1.3;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.np-modal-message {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.np-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.np-modal-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition);
+    border: none;
+    font-family: inherit;
+}
+
+.np-modal-btn-cancel {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.np-modal-btn-cancel:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--text-muted);
+}
+
+.np-modal-btn-confirm {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+}
+
+.np-modal-btn-confirm:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    box-shadow: 0 6px 18px rgba(239, 68, 68, 0.55);
+    transform: translateY(-1px);
 }
 
 /* AUTH PAGES (Login, Register, Profile) */

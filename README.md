@@ -74,7 +74,7 @@ Projekt vastab OWASP Top 10 turvastandarditele:
 
 ## 🧪 Automaattestid (Automated Tests)
 
-Projekt sisaldab põhjalikku PHPUnit testikomplekti, mis katab andmebaasi funktsioonid, autentimise, profiili ja turvamehhanismid:
+Projekt sisaldab põhjalikku PHPUnit testikomplekti, mis katab andmebaasi funktsioonid, autentimise, profiili, turvamehhanismid ja kommentaaride halduse/kustutamise:
 
 ```bash
 # Käivita testid Windowsi käsurealt:
@@ -82,8 +82,11 @@ test.bat
 
 # Või otse PHPUnit kaudu:
 C:\xampp\php\php.exe phpunit.phar
+
+# Konkreetse testiklassi käivitamine (nt kommentaaride haldus):
+test.bat --filter CommentManagementTest
 ```
-*Tulemus: 33 testi, 73 kontrolli (100% OK).*
+*Tulemus: 42 testi, 106 kontrolli (100% OK).*
 
 ## 🔑 Testkontod (Demo Credentials)
 

@@ -84,7 +84,7 @@ include 'header.php';
                             <td><span class="badge-category"><?= htmlspecialchars($c['name']) ?></span></td>
                             <td><b><?= $c['article_count'] ?></b> tk</td>
                             <td style="text-align: right;">
-                                <a href="categories.php?del=<?= $c['id'] ?>&csrf_token=<?= csrf_token() ?>" class="action-btn-del" onclick="return confirm('Kas oled kindel?');">Kustuta</a>
+                                <a href="categories.php?del=<?= $c['id'] ?>&csrf_token=<?= csrf_token() ?>" class="action-btn-del" data-confirm-title="Rubriigi kustutamine" data-confirm-message="Kas soovid selle rubriigi kindlasti kustutada?">Kustuta</a>
                             </td>
                         </tr>
                     <?php endwhile; ?>

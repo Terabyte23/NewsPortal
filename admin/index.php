@@ -84,7 +84,7 @@ include 'header.php';
                             <div class="action-btns" style="justify-content: flex-end;">
                                 <a href="news-edit.php?id=<?= $row['id'] ?>" class="action-btn-edit">Muuda</a>
                                 <span style="color: var(--border-color);">|</span>
-                                <a href="news-delete.php?id=<?= $row['id'] ?>" class="action-btn-del" onclick="return confirm('Kas oled kindel, et soovid selle uudise kustutada?');">Kustuta</a>
+                                <a href="news-delete.php?id=<?= $row['id'] ?>&csrf_token=<?= csrf_token() ?>" class="action-btn-del" data-confirm-title="Uudise kustutamine" data-confirm-message="Kas oled kindel, et soovid selle uudise kustutada?">Kustuta</a>
                             </div>
                         </td>
                     </tr>
@@ -124,7 +124,7 @@ include 'header.php';
                         <td><?= htmlspecialchars(mb_substr($c['text'], 0, 50)) ?>...</td>
                         <td><?= format_time_ago($c['date']) ?></td>
                         <td style="text-align: right;">
-                            <a href="comments.php?del=<?= $c['id'] ?>" class="action-btn-del" onclick="return confirm('Kustuta kommentaar?');">Kustuta</a>
+                            <a href="comments.php?del=<?= $c['id'] ?>&csrf_token=<?= csrf_token() ?>" class="action-btn-del" data-confirm-title="Kommentaari kustutamine" data-confirm-message="Kas soovid selle kommentaari kindlasti kustutada?">Kustuta</a>
                         </td>
                     </tr>
                 <?php endwhile; ?>

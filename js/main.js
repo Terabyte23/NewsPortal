@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initComments();
     initSharing();
     initNewsletter();
+    initDeleteConfirmations();
 });
 
 // 1. THEME SWITCHER
@@ -363,8 +364,16 @@ function initComments() {
                     textarea.value = '';
                     showToast('Kommentaar edukalt lisatud!');
                     
+                    const isAdmin = list && list.dataset.isAdmin === '1';
+                    const deleteBtnHtml = isAdmin ? 
+                        '<a href="news.php?id=' + encodeURIComponent(newsId) + '&del_comment=' + encodeURIComponent(data.comment.id) + '" class="comment-delete-btn" data-comment-id="' + data.comment.id + '" title="Kustuta kommentaar">' +
+                            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>' +
+                            ' Kustuta' +
+                        '</a>' : '';
+
                     const card = document.createElement('div');
                     card.className = 'comment-card';
+                    card.setAttribute('data-comment-id', data.comment.id);
                     card.innerHTML = 
                         '<div class="comment-top">' +
                             '<div class="comment-author-badge">' +
@@ -372,7 +381,10 @@ function initComments() {
                                 '<span class="comment-author-name">' + escapeHtml(data.comment.author || 'Lugeja') + '</span>' +
                                 '<span class="user-role-badge role-user">Lugeja</span>' +
                             '</div>' +
-                            '<span class="comment-date">Just praegu</span>' +
+                            '<div style="display: flex; align-items: center; gap: 10px;">' +
+                                '<span class="comment-date">Just praegu</span>' +
+                                deleteBtnHtml +
+                            '</div>' +
                         '</div>' +
                         '<p class="comment-text">' + escapeHtml(data.comment.text) + '</p>';
                     
@@ -395,6 +407,69 @@ function initComments() {
             });
         });
     }
+
+    // Comment deletion listener (for admin on news.php)
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.comment-delete-btn');
+        if (!btn) return;
+        e.preventDefault();
+
+        const commentId = btn.dataset.commentId;
+        const card = btn.closest('.comment-card');
+
+        showConfirmModal({
+            title: 'Kommentaari kustutamine',
+            message: 'Kas soovid selle kommentaari kindlasti kustutada?',
+            confirmText: 'Kustuta',
+            onConfirm: () => {
+                btn.disabled = true;
+                fetch(`api/comments.php?action=delete&id=${encodeURIComponent(commentId)}`, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Kommentaar edukalt kustutatud!');
+                        if (card) {
+                            card.style.transition = 'all 0.3s ease';
+                            card.style.opacity = '0';
+                            card.style.transform = 'translateY(-10px)';
+                            setTimeout(() => {
+                                card.remove();
+                                if (countBadge) {
+                                    const cur = Math.max(0, (parseInt(countBadge.textContent) || 1) - 1);
+                                    countBadge.textContent = cur;
+                                }
+                                if (list && list.querySelectorAll('.comment-card').length === 0) {
+                                    list.innerHTML = '<div class="no-comments-msg" style="text-align: center; padding: 30px; color: var(--text-muted);">' +
+                                        'Ole esimene, kes selle uudise kohta arvamust avaldab!' +
+                                    '</div>';
+                                }
+                            }, 300);
+                        }
+                    } else {
+                        const href = btn.getAttribute('href');
+                        if (href && href !== '#' && !href.startsWith('javascript:')) {
+                            window.location.href = href;
+                        } else {
+                            btn.disabled = false;
+                            showToast(data.error || 'Viga kommentaari kustutamisel');
+                        }
+                    }
+                })
+                .catch(() => {
+                    const href = btn.getAttribute('href');
+                    if (href && href !== '#' && !href.startsWith('javascript:')) {
+                        window.location.href = href;
+                    } else {
+                        btn.disabled = false;
+                        showToast('Võrgu viga kommentaari kustutamisel');
+                    }
+                });
+            }
+        });
+    });
 }
 
 // 9. SHARING & COPY LINK
@@ -445,5 +520,131 @@ function showToast(message) {
 function escapeHtml(text) {
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
     return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
+// 11. GLOBAL CONFIRMATION MODAL SYSTEM
+let activeConfirmCallback = null;
+
+function getOrInitConfirmModal() {
+    let overlay = document.getElementById('npConfirmModalOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'npConfirmModalOverlay';
+        overlay.className = 'np-modal-overlay';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.innerHTML = 
+            '<div class="np-modal-dialog">' +
+                '<div class="np-modal-header">' +
+                    '<div class="np-modal-icon-badge">' +
+                        '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                            '<polyline points="3 6 5 6 21 6"></polyline>' +
+                            '<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>' +
+                            '<line x1="10" y1="11" x2="10" y2="17"></line>' +
+                            '<line x1="14" y1="11" x2="14" y2="17"></line>' +
+                        '</svg>' +
+                    '</div>' +
+                    '<div class="np-modal-title-area">' +
+                        '<h3 class="np-modal-title" id="npConfirmModalTitle">Kinnita kustutamine</h3>' +
+                        '<p class="np-modal-message" id="npConfirmModalMessage">Kas oled kindel, et soovid selle elemendi kustutada? Seda tegevust ei saa tagasi võtta.</p>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="np-modal-footer">' +
+                    '<button type="button" class="np-modal-btn np-modal-btn-cancel" id="npConfirmModalCancel">Tühista</button>' +
+                    '<button type="button" class="np-modal-btn np-modal-btn-confirm" id="npConfirmModalSubmit">' +
+                        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                            '<polyline points="3 6 5 6 21 6"></polyline>' +
+                            '<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>' +
+                        '</svg>' +
+                        '<span id="npConfirmModalBtnText">Jah, kustuta</span>' +
+                    '</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+
+        const cancelBtn = overlay.querySelector('#npConfirmModalCancel');
+        const submitBtn = overlay.querySelector('#npConfirmModalSubmit');
+
+        cancelBtn.addEventListener('click', closeConfirmModal);
+        
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeConfirmModal();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && overlay.classList.contains('active')) {
+                closeConfirmModal();
+            }
+        });
+
+        submitBtn.addEventListener('click', () => {
+            const cb = activeConfirmCallback;
+            closeConfirmModal();
+            if (typeof cb === 'function') {
+                cb();
+            }
+        });
+    }
+    return overlay;
+}
+
+function showConfirmModal(opts) {
+    const options = opts || {};
+    const overlay = getOrInitConfirmModal();
+    const titleEl = overlay.querySelector('#npConfirmModalTitle');
+    const msgEl = overlay.querySelector('#npConfirmModalMessage');
+    const btnTextEl = overlay.querySelector('#npConfirmModalBtnText');
+    const cancelBtn = overlay.querySelector('#npConfirmModalCancel');
+
+    if (titleEl) titleEl.textContent = options.title || 'Kinnita kustutamine';
+    if (msgEl) msgEl.textContent = options.message || 'Kas oled kindel, et soovid selle elemendi kustutada? Seda tegevust ei saa tagasi võtta.';
+    if (btnTextEl) btnTextEl.textContent = options.confirmText || 'Jah, kustuta';
+    if (cancelBtn && options.cancelText) cancelBtn.textContent = options.cancelText;
+
+    activeConfirmCallback = options.onConfirm || null;
+    overlay.classList.add('active');
+
+    setTimeout(() => {
+        if (cancelBtn) cancelBtn.focus();
+    }, 60);
+}
+
+function closeConfirmModal() {
+    const overlay = document.getElementById('npConfirmModalOverlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+    }
+    activeConfirmCallback = null;
+}
+
+function initDeleteConfirmations() {
+    document.addEventListener('click', (e) => {
+        const trigger = e.target.closest('.action-btn-del, [data-confirm-delete]');
+        if (!trigger) return;
+        
+        // Skip comment delete buttons handled by custom ajax
+        if (trigger.classList.contains('comment-delete-btn')) return;
+
+        e.preventDefault();
+
+        const title = trigger.dataset.confirmTitle || 'Kustutamise kinnitus';
+        const message = trigger.dataset.confirmMessage || 'Kas oled kindel, et soovid selle elemendi kustutada? Seda tegevust ei saa tagasi võtta.';
+        const href = trigger.getAttribute('href');
+
+        showConfirmModal({
+            title: title,
+            message: message,
+            confirmText: 'Kustuta',
+            onConfirm: () => {
+                if (href && href !== '#' && !href.startsWith('javascript:')) {
+                    window.location.href = href;
+                } else if (trigger.form) {
+                    trigger.form.submit();
+                }
+            }
+        });
+    });
 }
 

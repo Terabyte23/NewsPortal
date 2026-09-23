@@ -62,14 +62,21 @@ if ($method === 'POST') {
     exit;
 }
 
-if ($method === 'DELETE' || (isset($_GET['action']) && $_GET['action'] === 'delete')) {
-    $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if ($method === 'DELETE' || (isset($_GET['action']) && $_GET['action'] === 'delete') || (isset($_POST['action']) && $_POST['action'] === 'delete')) {
+    $id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
+    if ($id <= 0) {
+        $rawInput = json_decode(file_get_contents('php://input'), true);
+        if (isset($rawInput['id'])) {
+            $id = (int)$rawInput['id'];
+        }
+    }
+
     if ($id <= 0) {
         echo json_encode(['success' => false, 'error' => 'Vigane ID']);
         exit;
     }
 
-    if (!is_admin($currentUser)) {
+    if (!is_admin($currentUser) && !is_editor_or_admin($currentUser)) {
         echo json_encode(['success' => false, 'error' => 'Puuduvad õigused']);
         exit;
     }

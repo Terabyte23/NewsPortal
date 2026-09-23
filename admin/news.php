@@ -95,7 +95,7 @@ include 'header.php';
                             <div class="action-btns" style="justify-content: flex-end;">
                                 <a href="news-edit.php?id=<?= $n['id'] ?>" class="action-btn-edit">Muuda</a>
                                 <span style="color: var(--border-color);">|</span>
-                                <a href="news-delete.php?id=<?= $n['id'] ?>&csrf_token=<?= csrf_token() ?>" class="action-btn-del" onclick="return confirm('Kas soovid artikli kindlasti kustutada?');">Kustuta</a>
+                                <a href="news-delete.php?id=<?= $n['id'] ?>&csrf_token=<?= csrf_token() ?>" class="action-btn-del" data-confirm-title="Uudise kustutamine" data-confirm-message="Kas soovid selle artikli kindlasti kustutada? Seda ei saa hiljem taastada.">Kustuta</a>
                             </div>
                         </td>
                     </tr>

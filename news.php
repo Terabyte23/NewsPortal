@@ -1,11 +1,28 @@
 <?php
 require_once 'db.php';
 
+$currentUser = get_logged_in_user($conn);
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($id <= 0) {
     header("Location: index.php");
     exit;
+}
+
+// Handle comment deletion by admin in article directly
+if (isset($_GET['del_comment'])) {
+    $delId = (int)$_GET['del_comment'];
+    if ($delId > 0 && $currentUser && (is_admin($currentUser) || is_editor_or_admin($currentUser))) {
+        if (verify_csrf_token($_GET['csrf_token'] ?? '')) {
+            $stmtDel = $conn->prepare("DELETE FROM comments WHERE id = ? AND news_id = ?");
+            if ($stmtDel) {
+                $stmtDel->bind_param("ii", $delId, $id);
+                $stmtDel->execute();
+            }
+            header("Location: news.php?id=" . $id . "&comm_deleted=1");
+            exit;
+        }
+    }
 }
 
 // 1. Increment view counter
@@ -239,13 +256,19 @@ include 'includes/header.php';
             </form>
         </div>
 
+        <?php if (isset($_GET['comm_deleted'])): ?>
+            <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <span>✅</span> Kommentaar edukalt kustutatud!
+            </div>
+        <?php endif; ?>
+
         <!-- COMMENTS LIST -->
-        <div class="comments-list" id="commentsList">
+        <div class="comments-list" id="commentsList" data-is-admin="<?= ($currentUser && (is_admin($currentUser) || is_editor_or_admin($currentUser))) ? '1' : '0' ?>">
             <?php if ($commentsRes && $commentsRes->num_rows > 0): ?>
                 <?php while ($comm = $commentsRes->fetch_assoc()): 
                     $cAuthor = $comm['author_name'] ?? 'Lugeja';
                 ?>
-                    <div class="comment-card">
+                    <div class="comment-card" data-comment-id="<?= $comm['id'] ?>">
                         <div class="comment-top">
                             <div class="comment-author-badge">
                                 <div class="avatar-circle" style="width: 28px; height: 28px; font-size: 0.75rem;">
@@ -254,7 +277,20 @@ include 'includes/header.php';
                                 <span class="comment-author-name"><?= htmlspecialchars($cAuthor) ?></span>
                                 <span class="user-role-badge role-user">Lugeja</span>
                             </div>
-                            <span class="comment-date"><?= format_time_ago($comm['date']) ?></span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="comment-date"><?= format_time_ago($comm['date']) ?></span>
+                                <?php if ($currentUser && (is_admin($currentUser) || is_editor_or_admin($currentUser))): ?>
+                                    <a href="news.php?id=<?= $news['id'] ?>&del_comment=<?= $comm['id'] ?>&csrf_token=<?= csrf_token() ?>" 
+                                       class="comment-delete-btn" 
+                                       data-comment-id="<?= $comm['id'] ?>"
+                                       data-confirm-title="Kommentaari kustutamine"
+                                       data-confirm-message="Kas soovid selle kommentaari kindlasti kustutada?"
+                                       title="Kustuta kommentaar">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                        Kustuta
+                                    </a>
+                                <?php endif; ?>
+                            </div>
                         </div>
                         <p class="comment-text"><?= nl2br(htmlspecialchars($comm['text'])) ?></p>
                     </div>
