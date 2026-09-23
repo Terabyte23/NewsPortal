@@ -17,3 +17,21 @@ Failis [`db.php`](db.php) on andmebaasiühenduse parameetrid (`root`, tühi paro
 ### Soovituslik lahendus:
 - Viia andmebaasi konfiguratsioon eraldi keskkonnamuutujate faili (`.env`), mis on lisatud `.gitignore` faili, kasutades standardset `getenv()` või `vlucas/phpdotenv` lahendust.
 - Eemaldada andmebaasi ja tabelite automaatne loomine lehe laadimise käitusajast (`db.php`). Migratsioone peaks käivitama ühekordselt käsurealt (CLI) paigalduse või uuenduste ajal.
+
+---
+
+## 2. Päringulimiitide (Rate Limiting) ja spämmikaitse puudumine API-s ning vaatamiste loenduris
+
+### Kirjeldus:
+Avalikes liidestes [`api/reactions.php`](api/reactions.php) ja [`api/comments.php`](api/comments.php) puudub päringusageduse piirang (Rate Limiting) ja kaitse automatiseeritud robotite vastu. Samuti suurendatakse failis [`news.php`](news.php) artikli vaatamiste loendurit (`UPDATE news SET views = views + 1 WHERE id = ?`) igal tavalisel lehe värskendamisel (F5) ilma sessiooni või IP-põhise unikaalsuse kontrollita.
+
+### Tagajärjed ja riskid:
+1. **Mõõdikute manipuleerimine:** Iga lihtne skript või robot saab saata tuhandeid POST-päringuid sekundis ning kerida artiklitele miljoneid meeldimisi või vaatamisi, muutes portaali analüütika ja edetabelid väärtusetuks.
+2. **Kommentaariumide spämmimine:** Külaliste kommentaarid ilma robotilõksu (Honeypot) või kontrollkoodita (CAPTCHA) võimaldavad pahatahtlikel robotitel andmebaasi hetkega rämpspostiga üle koormata.
+3. **Andmebaasi koormus (DoS oht):** Kontrollimatu kirjutamispäringute voog (`UPDATE news SET ...`) võib ammendada serveri andmebaasiühendused ja muuta veebilehe reaalsetele kasutajatele kättesaamatuks.
+
+### Soovituslik lahendus:
+- Rakendada vaatamiste unikaalsuse kontroll sessiooni põhiselt (`$_SESSION['viewed_news']`), et sama kasutaja lehte värskendades vaatamiste arv ei kasvaks korduvalt.
+- Luua päringute piiraja (Throttling / Rate-Limiting) avalikele API otspunktidele (nt maksimaalselt 5–10 reaktsiooni minutis ühelt IP-aadressilt).
+- Lisada külaliste kommentaarivormile Honeypot-tühi väli või Cloudflare Turnstile / reCAPTCHA integratsioon.
+
